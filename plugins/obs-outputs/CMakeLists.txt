@@ -37,6 +37,7 @@ message( STATUS "Looking for libwebrtc - found" )
 if( WEBRTC_H264_FOUND )
         message( STATUS "This libwebrtc package was built with H264 support." )
 else()
+		# H264 들어가 있으나 해당 루트를 타지는 않으므로 강제로 disable
         # Pass configuration items to the Code layer so as to e.g. not list
         # H.264 video codec In the UI if it is not available in libwebrtc
         # we could use a .h file, but here we are using precompiler instead

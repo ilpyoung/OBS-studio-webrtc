@@ -311,7 +311,7 @@ configure_obs_build() {
         -DBROWSER_LEGACY=OFF \
         -DBUILD_BROWSER=ON \
         -DWITH_RTMPS=ON \
-        -DBUILD_NDI=OFF \
+        -DBUILD_NDI=ON \
         -DCEF_ROOT_DIR="${DEPS_BUILD_DIR}/cef_binary_${MACOS_CEF_BUILD_VERSION}_macosx64" \
         -DCMAKE_BUILD_TYPE="${BUILD_CONFIG}" \
         -DOPENSSL_ROOT_DIR="/usr/local/opt/openssl" \
@@ -367,9 +367,9 @@ bundle_dylibs() {
         -x ./OBS-WebRTC.app/Contents/PlugIns/obs-x264.so \
         -x ./OBS-WebRTC.app/Contents/PlugIns/text-freetype2.so \
         -x ./OBS-WebRTC.app/Contents/PlugIns/obs-outputs.so \
+        -x ./OBS-WebRTC.app/Contents/PlugIns/obs-ndi.so \
         -x ./OBS-WebRTC.app/Contents/PlugIns/obs-browser.so
         
-#        -x ./OBS-WebRTC.app/Contents/PlugIns/obs-ndi.so \
 #        -x ./OBS-WebRTC.app/Contents/PlugIns/obs-websocket.so \
     step "Move libobs-opengl to final destination"
     /bin/cp ./libobs-opengl/libobs-opengl.so ./OBS-WebRTC.app/Contents/Frameworks
