@@ -7,7 +7,10 @@ project(websocketclient)
 #
 # NOTE ALEX: we should check that we are not overriding thsi setting here
 set(CMAKE_CXX_STANDARD 11)
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -c")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+#add_definitions(-DWEBRTC_MAC)
+#add_definitions(-DWEBRTC_POSIX)
 
 if(WIN32)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4503 /wd4267 /wd4244 /wd4996")
@@ -15,19 +18,18 @@ endif()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/restclient-cpp/include)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/websocketpp)
 include_directories(${CMAKE_SOURCE_DIR}/libobs)
 
 #------------------------------------------------------------------------
 # JSON
 #
-set(JSON_BuildTests OFF CACHE INTERNAL "")
-# set(JSON_Install OFF CACHE INTERNAL "")
-add_subdirectory(nlohmann_json)
+# set(JSON_BuildTests OFF CACHE INTERNAL "")
+# # set(JSON_Install OFF CACHE INTERNAL "")
+# add_subdirectory(nlohmann_json)
 
 #------------------------------------------------------------------------
-# OpenSSL
-#
+#OpenSSL
+
 find_package(OpenSSL 1.1 REQUIRED)
 message(STATUS "OPENSSL_INCLUDE_DIR:    ${OPENSSL_INCLUDE_DIR}"   )
 message(STATUS "OPENSSL_CRYPTO_LIBRARY: ${OPENSSL_CRYPTO_LIBRARY}")
@@ -36,17 +38,10 @@ message(STATUS "OPENSSL_VERSION:        ${OPENSSL_VERSION}"       )
 include_directories(${OPENSSL_INCLUDE_DIR})
 
 #------------------------------------------------------------------------
-# ASIO
-#
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/asio/include)
-include_directories(${CURL_INCLUDE_DIR})
-
-#------------------------------------------------------------------------
 # WebSocket
 #
 set(websocketclient_SOURCES
 	WebsocketClient.cpp
-	MillicastWebsocketClientImpl.cpp
 	CustomWebrtcImpl.cpp
 	restclient-cpp/source/connection.cc
 	restclient-cpp/source/helpers.cc
@@ -55,26 +50,30 @@ set(websocketclient_SOURCES
 
 set(websocketclient_HEADERS
 	WebsocketClient.h
-	MillicastWebsocketClientImpl.h
 	CustomWebrtcImpl.h)
 
-if(WIN32)
-	set(websocketclient_SOURCES ${websocketclient_SOURCES} dllmain.cpp)
-        add_definitions(-DWEBSOCKETCLIENT_EXPORTS)
-        add_library(websocketclient SHARED
+  add_library(websocketclient SHARED
 	        ${websocketclient_SOURCES}
 	        ${websocketclient_HEADERS})
-else()
-        add_library(websocketclient STATIC
-	        ${websocketclient_SOURCES}
-	        ${websocketclient_HEADERS})
-endif()
+install_obs_plugin(websocketclient)
+
+#if(WIN32)
+#	set(websocketclient_SOURCES ${websocketclient_SOURCES} dllmain.cpp)
+#        add_definitions(-DWEBSOCKETCLIENT_EXPORTS)
+#        add_library(websocketclient SHARED
+#	        ${websocketclient_SOURCES}
+#	        ${websocketclient_HEADERS})
+#else()
+#        add_library(websocketclient STATIC
+#	        ${websocketclient_SOURCES}
+#	        ${websocketclient_HEADERS})
+#endif()
 
 target_link_libraries(websocketclient
   PUBLIC libobs
 	PUBLIC ${CURL_LIB}
-	PUBLIC ${OPENSSL_LIBRARIES}
-	PRIVATE nlohmann_json::nlohmann_json)
+	PUBLIC ${OPENSSL_LIBRARIES})
+	# PRIVATE nlohmann_json::nlohmann_json)
 
 if(WIN32)
 	install_obs_plugin(websocketclient)

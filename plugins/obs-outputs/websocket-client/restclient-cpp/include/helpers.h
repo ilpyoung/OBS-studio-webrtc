@@ -12,9 +12,10 @@
 #include <string>
 #include <cctype>
 #include <algorithm>
+#include <iostream>
 #include <functional>
 
-#include "restclient-cpp/version.h"
+#include "version.h"
 
 /**
  * @brief namespace for all RestClient definitions

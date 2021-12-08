@@ -11,10 +11,10 @@
 #define _WEBSOCKETPP_CPP11_RANDOM_DEVICE_
 #define _WEBSOCKETPP_CPP11_MEMORY_
 
-#include "websocketpp/config/asio_client.hpp"
-#include "websocketpp/client.hpp"
+// #include "websocketpp/config/asio_client.hpp"
+// #include "websocketpp/client.hpp"
 
-typedef websocketpp::client<websocketpp::config::asio_tls_client> Client;
+// typedef websocketpp::client<websocketpp::config::asio_tls_client> Client;
 
 class CustomWebrtcImpl : public WebsocketClient {
 public:
@@ -23,8 +23,6 @@ public:
 
 	// WebsocketClient::Listener implementation
 	bool connect(const std::string &publish_api_url,
-		     const std::string & /* room */,
-		     const std::string &stream_name, const std::string &token,
 		     WebsocketClient::Listener *listener) override;
 	bool open(const std::string &sdp, const std::string &video_codec,
 		  const std::string &audio_codec,

@@ -4,7 +4,7 @@
 // #include "MillicastWebsocketClientImpl.h"
 #include "CustomWebrtcImpl.h"
 
-WEBSOCKETCLIENT_API WebsocketClient * createWebsocketClient(void)
+WEBSOCKETCLIENT_API WebsocketClient *createWebsocketClient(int type)
 {
 	return new CustomWebrtcImpl();
 }

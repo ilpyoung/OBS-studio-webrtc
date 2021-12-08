@@ -1,8 +1,8 @@
 // Copyright Dr. Alex. Gouaillard (2015, 2020)
 
 #include "CustomWebrtcImpl.h"
-#include "restclient-cpp/connection.h"
-#include "restclient-cpp/restclient.h"
+#include "connection.h"
+#include "restclient.h"
 
 #include <util/base.h>
 
@@ -26,13 +26,10 @@ CustomWebrtcImpl::~CustomWebrtcImpl()
 }
 
 bool CustomWebrtcImpl::connect(const std::string &publish_api_url,
-			       const std::string & /* room */,
-			       const std::string & /*stream_name*/,
-			       const std::string &token,
 			       WebsocketClient::Listener *listener)
 {
 	this->serverUrl = sanitizeString(publish_api_url);
-	this->token = sanitizeString(token);
+	// this->token = sanitizeString(token);
 	this->listener = listener;
 
 	listener->onLogged(0);
