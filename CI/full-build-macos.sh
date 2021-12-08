@@ -41,17 +41,24 @@ BUILD_DIR="${BUILD_DIR:-build}"
 BUILD_CONFIG=${BUILD_CONFIG:-RelWithDebInfo}
 CI_SCRIPTS="${CHECKOUT_DIR}/CI/scripts/macos"
 CI_WORKFLOW="${CHECKOUT_DIR}/.github/workflows/main.yml"
+MACOS_CEF_BUILD_VERSION=4183
+CI_MACOS_CEF_VERSION=$(/bin/cat "${CI_WORKFLOW}" | /usr/bin/sed -En "s/[ ]+MACOS_CEF_BUILD_VERSION: '([0-9]+)'/\1/p")
+CI_DEPS_VERSION=$(/bin/cat "${CI_WORKFLOW}" | /usr/bin/sed -En "s/[ ]+MACOS_DEPS_VERSION: '([0-9\-]+)'/\1/p")
+CI_VLC_VERSION=$(/bin/cat "${CI_WORKFLOW}" | /usr/bin/sed -En "s/[ ]+VLC_VERSION: '([0-9\.]+)'/\1/p")
 CI_SPARKLE_VERSION=$(/bin/cat "${CI_WORKFLOW}" | /usr/bin/sed -En "s/[ ]+SPARKLE_VERSION: '([0-9\.]+)'/\1/p")
+CI_QT_VERSION=$(/bin/cat "${CI_WORKFLOW}" | /usr/bin/sed -En "s/[ ]+QT_VERSION: '([0-9\.]+)'/\1/p" | /usr/bin/head -1)
+MIN_MACOS_VERSION=$(/bin/cat "${CI_WORKFLOW}" | /usr/bin/sed -En "s/[ ]+MIN_MACOS_VERSION: '([0-9\.]+)'/\1/p")
 NPROC="${NPROC:-$(sysctl -n hw.ncpu)}"
 CURRENT_ARCH=$(uname -m)
-VENDOR="${VENDOR:-vendorNameMissing}"
+VENDOR="Dynamicmedia"
+OBS_VERSION="27.1.2"
 
 BUILD_DEPS=(
-    "obs-deps ${MACOS_DEPS_VERSION}"
-    "qt-deps ${QT_VERSION} ${MACOS_DEPS_VERSION}"
-    "cef ${MACOS_CEF_BUILD_VERSION:-${MACOS_CEF_VERSION}}"
-    "vlc ${VLC_VERSION}"
-    "libwebrtc ${LIBWEBRTC_VERSION}"
+#    "obs-deps ${MACOS_DEPS_VERSION:-${CI_DEPS_VERSION}}"
+#    "qt-deps ${QT_VERSION:-${CI_QT_VERSION}} ${MACOS_DEPS_VERSION:-${CI_DEPS_VERSION}}"
+#    "cef ${MACOS_CEF_BUILD_VERSION:-${CI_MACOS_CEF_VERSION}}"
+#    "vlc ${VLC_VERSION:-${CI_VLC_VERSION}}"
+#    "libwebrtc ${LIBWEBRTC_VERSION}"
 )
 
 if [ -n "${TERM-}" ]; then
@@ -100,7 +107,7 @@ ensure_dir() {
 }
 
 cleanup() {
-    /bin/rm -rf "${CHECKOUT_DIR}/${BUILD_DIR}_${VENDOR}/settings.json"
+    /bin/rm -rf "${CHECKOUT_DIR}/${BUILD_DIR}settings.json"
     unset CODESIGN_IDENT
     unset CODESIGN_IDENT_USER
     unset CODESIGN_IDENT_PASS
@@ -114,7 +121,7 @@ caught_error() {
 
 ## CHECK AND INSTALL DEPENDENCIES ##
 check_macos_version() {
-    MIN_VERSION=${MIN_MACOS_VERSION:-${CI_MIN_MACOS_VERSION}}
+    MIN_VERSION=${MIN_MACOS_VERSION:-${MIN_MACOS_VERSION}}
     MIN_MAJOR=$(/bin/echo ${MIN_VERSION} | /usr/bin/cut -d '.' -f 1)
     MIN_MINOR=$(/bin/echo ${MIN_VERSION} | /usr/bin/cut -d '.' -f 2)
 
@@ -166,7 +173,7 @@ check_ccache() {
 install_obs-deps() {
     hr "Setting up pre-built macOS OBS dependencies v${1}"
     ensure_dir "${DEPS_BUILD_DIR}"
-    step "Download..."
+    step "Download...'https://github.com/obsproject/obs-deps/releases/download/${1}/macos-deps-${CURRENT_ARCH}-${1}.tar.gz}'"
     ${CURLCMD} --progress-bar -L -C - -O https://github.com/obsproject/obs-deps/releases/download/${1}/macos-deps-${CURRENT_ARCH}-${1}.tar.gz
     step "Unpack..."
     /usr/bin/tar -xf "./macos-deps-${CURRENT_ARCH}-${1}.tar.gz" -C /tmp
@@ -185,6 +192,7 @@ install_qt-deps() {
 install_vlc() {
     hr "Setting up dependency VLC v${1}"
     ensure_dir "${DEPS_BUILD_DIR}"
+    step "${DEPS_BUILD_DIR}"
     step "Download..."
     ${CURLCMD} --progress-bar -L -C - -O https://downloads.videolan.org/vlc/${1}/vlc-${1}.tar.xz
     step "Unpack ..."
@@ -222,9 +230,13 @@ install_cef() {
     step "Run CMAKE..."
     cmake \
         -DCMAKE_BUILD_TYPE=Release \
+        -DDISABLE_PYTHON=ON \
+        -DBUILD_BROWSER=OFF \
+        -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
+        -DOPENSSL_LIBRARIES=/usr/local/opt/openssl/lib \
         -DCMAKE_CXX_FLAGS="-std=c++11 -stdlib=libc++ -Wno-deprecated-declarations"\
         -DCMAKE_EXE_LINKER_FLAGS="-std=c++11 -stdlib=libc++"\
-        -DCMAKE_OSX_DEPLOYMENT_TARGET=${MIN_MACOS_VERSION} \
+        -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
         ..
     step "Build..."
     /usr/bin/make -j${NPROC}
@@ -238,14 +250,8 @@ install_libwebrtc() {
     fi
     hr "Installing LibWebRTC v${1}"
     ensure_dir ${DEPS_BUILD_DIR}
-    step "Download..."
-    ${CURLCMD} --progress-bar -u ${FTP_LOGIN}:${FTP_PASSWORD} -L -C - -o libWebRTC.dmg ${FTP_PATH_PREFIX}/mac/libWebRTC-${1}-x64-Release-H264-OpenSSL_1_1_1a.dmg
-    step "Bypass the EULA by converting the DMG download to a CDR image"
-    hdiutil convert -quiet libWebRTC.dmg -format UDTO -o libWebRTC
-    step "Mount the CDR image"
-    hdiutil attach -quiet -nobrowse -noverify libWebRTC.cdr
     step "Copy to destination..."
-    cp -r /Volumes/libWebRTC-${1}-x64-Release-H264-OpenSSL_1_1_1a/libwebrtc ./
+    cp -r /Users/juhopark/Downloads/libwebrtc-macos-x64-h264 ./
 }
 
 ## CHECK AND INSTALL PACKAGING DEPENDENCIES ##
@@ -266,7 +272,7 @@ install_dmgbuild() {
 
 ## OBS BUILD FROM SOURCE ##
 configure_obs_build() {
-    ensure_dir "${CHECKOUT_DIR}/${BUILD_DIR}_${VENDOR}"
+    ensure_dir "${CHECKOUT_DIR}/${BUILD_DIR}"
 
     CUR_DATE=$(/bin/date +"%Y-%m-%d@%H%M%S")
     NIGHTLY_DIR="${CHECKOUT_DIR}/nightly-${CUR_DATE}"
@@ -274,26 +280,26 @@ configure_obs_build() {
 
     if [ -d ./OBS-WebRTC.app ]; then
         ensure_dir "${NIGHTLY_DIR}"
-        /bin/mv "../${BUILD_DIR}_${VENDOR}/OBS-WebRTC.app" .
+        /bin/mv "../${BUILD_DIR}/OBS-WebRTC.app" .
         info "You can find OBS-WebRTC.app in ${NIGHTLY_DIR}"
     fi
-    ensure_dir "${CHECKOUT_DIR}/${BUILD_DIR}_${VENDOR}"
+    ensure_dir "${CHECKOUT_DIR}/${BUILD_DIR}"
     if ([ -n "${PACKAGE_NAME}" ] && [ -f ${PACKAGE_NAME} ]); then
         ensure_dir "${NIGHTLY_DIR}"
-        /bin/mv "../${BUILD_DIR}_${VENDOR}/$(basename "${PACKAGE_NAME}")" .
+        /bin/mv "../${BUILD_DIR}/$(basename "${PACKAGE_NAME}")" .
         info "You can find ${PACKAGE_NAME} in ${NIGHTLY_DIR}"
     fi
 
-    ensure_dir "${CHECKOUT_DIR}/${BUILD_DIR}_${VENDOR}"
+    ensure_dir "${CHECKOUT_DIR}/${BUILD_DIR}"
 
-    if [ "${VENDOR}" == "Millicast" ]
-    then
-        vendor_option=""
-    else
-        vendor_option="-DOBS_WEBRTC_VENDOR_NAME=${VENDOR}"
-    fi
+#    if [ "${VENDOR}" == "Millicast" ]
+#    then
+#        vendor_option=""
+#    else
+#        vendor_option="-DOBS_WEBRTC_VENDOR_NAME=${VENDOR}"
+#    fi
 
-    hr "Run CMAKE for OBS..."
+    hr "Run CMAKE for OBS... "${CHECKOUT_DIR}/${BUILD_DIR}" ${VLC_VERSION}"
     cmake \
         -DCMAKE_OSX_DEPLOYMENT_TARGET=${MIN_MACOS_VERSION} \
         -DOBS_VERSION_OVERRIDE=${OBS_VERSION} \
@@ -301,34 +307,33 @@ configure_obs_build() {
         -DQTDIR="/tmp/obsdeps" \
         -DSWIGDIR="/tmp/obsdeps" \
         -DDepsPath="/tmp/obsdeps" \
-        -DVLCPath="${DEPS_BUILD_DIR}/vlc-${VLC_VERSION}" \
-        -DBUILD_BROWSER=ON \
+        -DVLCPath="${DEPS_BUILD_DIR}/vlc-3.0.8" \
         -DBROWSER_LEGACY=OFF \
+        -DBUILD_BROWSER=ON \
         -DWITH_RTMPS=ON \
+        -DBUILD_NDI=OFF \
         -DCEF_ROOT_DIR="${DEPS_BUILD_DIR}/cef_binary_${MACOS_CEF_BUILD_VERSION}_macosx64" \
         -DCMAKE_BUILD_TYPE="${BUILD_CONFIG}" \
-        .. \
-        ${vendor_option} \
-        -Dlibwebrtc_DIR="${DEPS_BUILD_DIR}/libwebrtc/cmake" \
-        -DOPENSSL_ROOT_DIR="/usr/local/opt/openssl@1.1" \
-        -DBUILD_NDI=ON \
-        -DBUILD_WEBSOCKET=ON \
+        -DOPENSSL_ROOT_DIR="/usr/local/opt/openssl" \
+        -DOPENSSL_LIBRARIES="/usr/local/opt/openssl/lib" \
         -DLIBOBS_INCLUDE_DIR=../libobs \
         -DLIBOBS_LIB=`pwd`/libobs/libobs.0.dylib \
-        -DOBS_FRONTEND_LIB=`pwd`/UI/obs-frontend-api/libobs-frontend-api.dylib
-
+        -DOBS_FRONTEND_LIB=`pwd`/UI/obs-frontend-api/libobs-frontend-api.dylib \
+        ..
+        
+#        -Dlibwebrtc_DIR="${DEPS_BUILD_DIR}/libwebrtc" \
         # -DENABLE_SPARKLE_UPDATER=ON \
 }
 
 run_obs_build() {
-    ensure_dir "${CHECKOUT_DIR}/${BUILD_DIR}_${VENDOR}"
+    ensure_dir "${CHECKOUT_DIR}/${BUILD_DIR}"
     hr "Build OBS..."
     /usr/bin/make -j${NPROC}
 }
 
 ## OBS BUNDLE AS MACOS APPLICATION ##
 bundle_dylibs() {
-    ensure_dir "${CHECKOUT_DIR}/${BUILD_DIR}_${VENDOR}"
+    ensure_dir "${CHECKOUT_DIR}/${BUILD_DIR}"
 
     if [ ! -d ./OBS-WebRTC.app ]; then
         error "No OBS-WebRTC.app bundle found"
@@ -352,7 +357,6 @@ bundle_dylibs() {
         -x ./OBS-WebRTC.app/Contents/PlugIns/mac-syphon.so \
         -x ./OBS-WebRTC.app/Contents/PlugIns/mac-vth264.so \
         -x ./OBS-WebRTC.app/Contents/PlugIns/mac-virtualcam.so \
-        -x ./OBS-WebRTC.app/Contents/PlugIns/obs-browser.so \
         -x ./OBS-WebRTC.app/Contents/PlugIns/obs-ffmpeg.so \
         -x ./OBS-WebRTC.app/Contents/PlugIns/obs-filters.so \
         -x ./OBS-WebRTC.app/Contents/PlugIns/obs-transitions.so \
@@ -363,9 +367,10 @@ bundle_dylibs() {
         -x ./OBS-WebRTC.app/Contents/PlugIns/obs-x264.so \
         -x ./OBS-WebRTC.app/Contents/PlugIns/text-freetype2.so \
         -x ./OBS-WebRTC.app/Contents/PlugIns/obs-outputs.so \
-        -x ./OBS-WebRTC.app/Contents/PlugIns/obs-ndi.so \
-        -x ./OBS-WebRTC.app/Contents/PlugIns/obs-websocket.so
-
+        -x ./OBS-WebRTC.app/Contents/PlugIns/obs-browser.so
+        
+#        -x ./OBS-WebRTC.app/Contents/PlugIns/obs-ndi.so \
+#        -x ./OBS-WebRTC.app/Contents/PlugIns/obs-websocket.so \
     step "Move libobs-opengl to final destination"
     /bin/cp ./libobs-opengl/libobs-opengl.so ./OBS-WebRTC.app/Contents/Frameworks
 
@@ -380,7 +385,7 @@ bundle_dylibs() {
 }
 
 install_frameworks() {
-    ensure_dir "${CHECKOUT_DIR}/${BUILD_DIR}_${VENDOR}"
+    ensure_dir "${CHECKOUT_DIR}/${BUILD_DIR}"
 
     if [ ! -d ./OBS-WebRTC.app ]; then
         error "No OBS-WebRTC.app bundle found"
@@ -394,7 +399,7 @@ install_frameworks() {
 }
 
 prepare_macos_bundle() {
-    ensure_dir "${CHECKOUT_DIR}/${BUILD_DIR}_${VENDOR}"
+    ensure_dir "${CHECKOUT_DIR}/${BUILD_DIR}"
 
     if [ ! -d ./rundir/${BUILD_CONFIG}/bin ]; then
         error "No OBS build found"
@@ -413,10 +418,12 @@ prepare_macos_bundle() {
     /bin/cp rundir/${BUILD_CONFIG}/bin/obs ./OBS-WebRTC.app/Contents/MacOS
     /bin/cp rundir/${BUILD_CONFIG}/bin/obs-ffmpeg-mux ./OBS-WebRTC.app/Contents/MacOS
     /bin/cp rundir/${BUILD_CONFIG}/bin/libobsglad.0.dylib ./OBS-WebRTC.app/Contents/MacOS
-    /bin/cp -R "rundir/${BUILD_CONFIG}/bin/OBS Helper.app" "./OBS-WebRTC.app/Contents/Frameworks/OBS Helper.app"
-    /bin/cp -R "rundir/${BUILD_CONFIG}/bin/OBS Helper (GPU).app" "./OBS-WebRTC.app/Contents/Frameworks/OBS Helper (GPU).app"
-    /bin/cp -R "rundir/${BUILD_CONFIG}/bin/OBS Helper (Plugin).app" "./OBS-WebRTC.app/Contents/Frameworks/OBS Helper (Plugin).app"
-    /bin/cp -R "rundir/${BUILD_CONFIG}/bin/OBS Helper (Renderer).app" "./OBS-WebRTC.app/Contents/Frameworks/OBS Helper (Renderer).app"
+   if ! [ "${MACOS_CEF_BUILD_VERSION:-${CI_MACOS_CEF_VERSION}}" -le 3770 ]; then
+        /bin/cp -R "rundir/${BUILD_CONFIG}/bin/OBS Helper.app" "./OBS-WebRTC.app/Contents/Frameworks/OBS Helper.app"
+        /bin/cp -R "rundir/${BUILD_CONFIG}/bin/OBS Helper (GPU).app" "./OBS-WebRTC.app/Contents/Frameworks/OBS Helper (GPU).app"
+        /bin/cp -R "rundir/${BUILD_CONFIG}/bin/OBS Helper (Plugin).app" "./OBS-WebRTC.app/Contents/Frameworks/OBS Helper (Plugin).app"
+        /bin/cp -R "rundir/${BUILD_CONFIG}/bin/OBS Helper (Renderer).app" "./OBS-WebRTC.app/Contents/Frameworks/OBS Helper (Renderer).app"
+    fi
     /bin/cp -R rundir/${BUILD_CONFIG}/data ./OBS-WebRTC.app/Contents/Resources
     /bin/cp "${CI_SCRIPTS}/app/AppIcon.icns" ./OBS-WebRTC.app/Contents/Resources
     /bin/cp -R rundir/${BUILD_CONFIG}/obs-plugins/ ./OBS-WebRTC.app/Contents/PlugIns
@@ -444,7 +451,7 @@ prepare_macos_bundle() {
 
 ## CREATE MACOS DISTRIBUTION AND INSTALLER IMAGE ##
 prepare_macos_image() {
-    ensure_dir "${CHECKOUT_DIR}/${BUILD_DIR}_${VENDOR}"
+    ensure_dir "${CHECKOUT_DIR}/${BUILD_DIR}"
 
     if [ ! -d ./OBS-WebRTC.app ]; then
         error "No OBS-WebRTC.app bundle found"
@@ -461,7 +468,7 @@ prepare_macos_image() {
     /bin/cp "${CI_SCRIPTS}/package/settings.json.template" ./settings.json
     /usr/bin/sed -i '' 's#\$\$VERSION\$\$#'"${OBS_VERSION}"'#g' ./settings.json
     /usr/bin/sed -i '' 's#\$\$CI_PATH\$\$#'"${CI_SCRIPTS}"'#g' ./settings.json
-    /usr/bin/sed -i '' 's#\$\$BUNDLE_PATH\$\$#'"${CHECKOUT_DIR}"'/build_'"${VENDOR}"'#g' ./settings.json
+    /usr/bin/sed -i '' 's#\$\$BUNDLE_PATH\$\$#'"${CHECKOUT_DIR}"'/build''#g' ./settings.json
     /bin/echo -n "${COLOR_ORANGE}"
     dmgbuild "OBS-Studio-WebRTC ${OBS_VERSION}" "${FILE_NAME}" -s ./settings.json
     /bin/echo -n "${COLOR_RESET}"
@@ -518,7 +525,7 @@ read_codesign_pass() {
 codesign_bundle() {
     if [ ! -n "${CODESIGN_OBS}" ]; then step "Skipping application bundle code signing"; return; fi
 
-    ensure_dir "${CHECKOUT_DIR}/${BUILD_DIR}_${VENDOR}"
+    ensure_dir "${CHECKOUT_DIR}/${BUILD_DIR}"
     trap "caught_error 'code-signing app'" ERR
 
     if [ ! -d ./OBS-WebRTC.app ]; then
@@ -574,7 +581,7 @@ codesign_bundle() {
 codesign_image() {
     if [ ! -n "${CODESIGN_OBS}" ]; then step "Skipping installer image code signing"; return; fi
 
-    ensure_dir "${CHECKOUT_DIR}/${BUILD_DIR}_${VENDOR}"
+    ensure_dir "${CHECKOUT_DIR}/${BUILD_DIR}"
     trap "caught_error 'code-signing image'" ERR
 
     if [ ! -f "${FILE_NAME}" ]; then
@@ -646,7 +653,7 @@ notarize_macos() {
     hr "Notarizing OBS for macOS"
     trap "caught_error 'notarizing app'" ERR
 
-    ensure_dir "${CHECKOUT_DIR}/${BUILD_DIR}_${VENDOR}"
+    ensure_dir "${CHECKOUT_DIR}/${BUILD_DIR}"
 
     if [ -f "${FILE_NAME}" ]; then
         NOTARIZE_TARGET="${FILE_NAME}"
@@ -670,7 +677,8 @@ notarize_macos() {
 ## MAIN SCRIPT FUNCTIONS ##
 print_usage() {
     /bin/echo "full-build-macos.sh - Build helper script for OBS-Studio\n"
-    /bin/echo "Usage: ${0}\n" \
+    
+    /bin/echo "Usage: ${0} \n" \
         "-d: Skip dependency checks\n" \
         "-b: Create macOS app bundle\n" \
         "-c: Codesign macOS app bundle\n" \

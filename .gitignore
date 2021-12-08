@@ -21,7 +21,7 @@
 *.ninja
 .ninja*
 .dirstamp
-
+/CI/scripts/macos/Brewfile.lock.json
 #curl
 /curl
 
