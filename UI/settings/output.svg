@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+    <defs>
+        <clipPath id="clip-path">
+            <path id="사각형_7152" data-name="사각형 7152" class="cls-1" d="M0 0h20v19H0z"/>
+        </clipPath>
+        <style>
+            .cls-1{fill:#fafafa}
+        </style>
+    </defs>
+    <g id="ic__output" data-name="ic_ output" transform="translate(9546 -4762)">
+        <g id="그룹_23267" data-name="그룹 23267" transform="translate(1314 -.5)">
+            <path id="합치기_21" data-name="합치기 21" class="cls-1" d="M8 7.066V5H0V3h8V.934a.5.5 0 0 1 .778-.416l4.6 3.065a.5.5 0 0 1 0 .833l-4.6 3.065A.5.5 0 0 1 8 7.066z" transform="translate(-10851 4768.5)"/>
+            <g id="그룹_19499" data-name="그룹 19499" transform="translate(-10859 4765)">
+                <g id="그룹_19498" data-name="그룹 19498" style="clip-path:url(#clip-path)">
+                    <path id="패스_23287" data-name="패스 23287" class="cls-1" d="M18 12.162V13H2V2h16v.838l2 1.5V1.007A1 1 0 0 0 19.008 0H.992A1.007 1.007 0 0 0 0 1.007v12.986A1 1 0 0 0 .992 15H9v2H5v2h10v-2h-4v-2h8.008A1.007 1.007 0 0 0 20 13.993v-3.331z"/>
+                </g>
+            </g>
+        </g>
+        <path id="사각형_9448" data-name="사각형 9448" transform="translate(-9546 4762)" style="fill:none" d="M0 0h24v24H0z"/>
+    </g>
+</svg>

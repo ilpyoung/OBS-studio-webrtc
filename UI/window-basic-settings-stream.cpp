@@ -142,6 +142,7 @@ void OBSBasicSettings::LoadStream1Settings()
 	const char *service = strcmp("", tmpString) == 0 ? "Millicast-WebRTC"
 							 : tmpString;
 
+
 	const char *server = obs_data_get_string(settings, "server");
 	const char *key = obs_data_get_string(settings, "key");
 
@@ -169,7 +170,6 @@ void OBSBasicSettings::LoadStream1Settings()
 		const char *password =
 			obs_data_get_string(settings, "password");
 		ui->authUsername->setText(QT_UTF8(username));
-		ui->authPw->setText(QT_UTF8(password));
 		ui->useAuth->setChecked(use_auth);
 
 		// NOTE LUDO: #172 codecs list of radio buttons
@@ -239,7 +239,6 @@ void OBSBasicSettings::LoadStream1Settings()
 
 		const char *password =
 			obs_data_get_string(settings, "password");
-		ui->authPw->setText(QT_UTF8(password));
 
 		tmpString = obs_data_get_string(settings, "codec");
 		// NOTE LUDO: #172 codecs list of radio buttons
@@ -364,8 +363,6 @@ void OBSBasicSettings::SaveStream1Settings()
 				  ui->useAuth->isChecked());
 		obs_data_set_string(settings, "username",
 				    QT_TO_UTF8(ui->authUsername->text()));
-		obs_data_set_string(settings, "password",
-				    QT_TO_UTF8(ui->authPw->text()));
 		obs_data_set_string(settings, "room",
 				    QT_TO_UTF8(ui->room->text()));
 		obs_data_set_string(
@@ -384,8 +381,6 @@ void OBSBasicSettings::SaveStream1Settings()
 				  ui->useAuth->isChecked());
 		obs_data_set_string(settings, "username",
 				    QT_TO_UTF8(ui->authUsername->text()));
-		obs_data_set_string(settings, "password",
-				    QT_TO_UTF8(ui->authPw->text()));
 		obs_data_set_string(
 			settings, "protocol",
 			QT_TO_UTF8(ui->streamProtocol->currentText()));
@@ -679,8 +674,6 @@ void OBSBasicSettings::on_service_currentIndexChanged(int)
 	ui->useAuth->setVisible(false);
 	ui->authUsernameLabel->setVisible(isWebrtc);
 	ui->authUsername->setVisible(isWebrtc);
-	ui->authPwLabel->setVisible(false);
-	ui->authPwWidget->setVisible(false);
 
 	if (custom && !isWebrtc) {
 		ui->streamkeyPageLayout->insertRow(1, ui->serverLabel,
@@ -712,8 +705,8 @@ void OBSBasicSettings::on_service_currentIndexChanged(int)
 		ui->streamProtocol->setVisible(false);
 		ui->streamingAdvancedSettingsButton->setVisible(false);
 		ui->simulcastEnable->setVisible(false);
-		ui->publishApiUrlLabel->setVisible(false);
-		ui->publishApiUrl->setVisible(false);
+		ui->publishApiUrlLabel->setVisible(true);
+		ui->publishApiUrl->setVisible(true);
 	} else if (isWebrtc) {
 		ui->streamKeyLabel->setVisible(false);
 		ui->streamKeyWidget->setVisible(false);
@@ -741,7 +734,6 @@ void OBSBasicSettings::on_service_currentIndexChanged(int)
 		ui->roomLabel->setText(obs_property_description(room));
 		ui->authUsernameLabel->setText(
 			obs_property_description(username));
-		ui->authPwLabel->setText(obs_property_description(password));
 		int min_idx = 1;
 		if (obs_property_visible(server)) {
 			ui->streamkeyPageLayout->insertRow(
@@ -760,11 +752,7 @@ void OBSBasicSettings::on_service_currentIndexChanged(int)
 				ui->authUsername);
 			min_idx++;
 		}
-		if (obs_property_visible(password)) {
-			ui->streamkeyPageLayout->insertRow(
-				min_idx, ui->authPwLabel, ui->authPwWidget);
-			min_idx++;
-		}
+
 		// NOTE LUDO: #172 codecs list of radio buttons
 		// if (obs_property_visible(codec)) {
 		// 	ui->streamkeyPageLayout->insertRow(
@@ -785,8 +773,6 @@ void OBSBasicSettings::on_service_currentIndexChanged(int)
 		ui->authUsernameLabel->setVisible(
 			obs_property_visible(username));
 		ui->authUsername->setVisible(obs_property_visible(username));
-		ui->authPwLabel->setVisible(obs_property_visible(password));
-		ui->authPwWidget->setVisible(obs_property_visible(password));
 		ui->codecLabel->setVisible(obs_property_visible(codec));
 		// NOTE LUDO: #172 codecs list of radio buttons
 		// ui->codec->setVisible(obs_property_visible(codec));
@@ -803,14 +789,13 @@ void OBSBasicSettings::on_service_currentIndexChanged(int)
 		ui->streamProtocolLabel->setVisible(
 			obs_property_visible(protocol));
 		ui->streamProtocol->setVisible(obs_property_visible(protocol));
-		ui->streamingAdvancedSettingsButton->setVisible(true);
+		ui->streamingAdvancedSettingsButton->setVisible(false);
 		ui->simulcastEnable->setVisible(false);
-		ui->publishApiUrlLabel->setVisible(false);
-		ui->publishApiUrl->setVisible(false);
+		ui->publishApiUrlLabel->setVisible(true);
+		ui->publishApiUrl->setVisible(true);
 		obs_properties_destroy(props);
 	} else if (!custom && !isWebrtc) {
 		ui->authUsernameLabel->setText("Username");
-		ui->authPwLabel->setText("Password");
 		ui->streamkeyPageLayout->insertRow(1, ui->serverLabel,
 						   ui->serverStackedWidget);
 		ui->streamkeyPageLayout->insertRow(2, ui->streamKeyLabel,
@@ -818,8 +803,6 @@ void OBSBasicSettings::on_service_currentIndexChanged(int)
 		ui->streamkeyPageLayout->insertRow(3, NULL, ui->useAuth);
 		ui->streamkeyPageLayout->insertRow(4, ui->authUsernameLabel,
 						   ui->authUsername);
-		ui->streamkeyPageLayout->insertRow(5, ui->authPwLabel,
-						   ui->authPwWidget);
 		// NOTE LUDO: #172 codecs list of radio buttons
 		// ui->streamkeyPageLayout->insertRow(6, ui->codecLabel,
 		// 				   ui->codec);
@@ -849,8 +832,8 @@ void OBSBasicSettings::on_service_currentIndexChanged(int)
 		ui->codecGroupBox->setVisible(false);
 		ui->streamingAdvancedSettingsButton->setVisible(false);
 		ui->simulcastEnable->setVisible(false);
-		ui->publishApiUrlLabel->setVisible(false);
-		ui->publishApiUrl->setVisible(false);
+		ui->publishApiUrlLabel->setVisible(true);
+		ui->publishApiUrl->setVisible(true);
 	}
 
 	auth.reset();
@@ -915,13 +898,7 @@ void OBSBasicSettings::on_show_clicked()
 
 void OBSBasicSettings::on_authPwShow_clicked()
 {
-	if (ui->authPw->echoMode() == QLineEdit::Password) {
-		ui->authPw->setEchoMode(QLineEdit::Normal);
-		ui->authPwShow->setText(QTStr("Hide"));
-	} else {
-		ui->authPw->setEchoMode(QLineEdit::Password);
-		ui->authPwShow->setText(QTStr("Show"));
-	}
+
 }
 
 OBSService OBSBasicSettings::SpawnTempService()
@@ -1105,8 +1082,7 @@ void OBSBasicSettings::on_useAuth_toggled()
 
 	ui->authUsernameLabel->setVisible(use_auth);
 	ui->authUsername->setVisible(use_auth);
-	ui->authPwLabel->setVisible(use_auth);
-	ui->authPwWidget->setVisible(use_auth);
+
 }
 
 void OBSBasicSettings::UpdateVodTrackSetting()
