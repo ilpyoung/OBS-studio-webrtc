@@ -54,11 +54,11 @@ VENDOR="Dynamicmedia"
 OBS_VERSION="27.1.2"
 
 BUILD_DEPS=(
-#    "obs-deps ${MACOS_DEPS_VERSION:-${CI_DEPS_VERSION}}"
-#    "qt-deps ${QT_VERSION:-${CI_QT_VERSION}} ${MACOS_DEPS_VERSION:-${CI_DEPS_VERSION}}"
-#    "cef ${MACOS_CEF_BUILD_VERSION:-${CI_MACOS_CEF_VERSION}}"
-#    "vlc ${VLC_VERSION:-${CI_VLC_VERSION}}"
-#    "libwebrtc ${LIBWEBRTC_VERSION}"
+    "obs-deps ${MACOS_DEPS_VERSION:-${CI_DEPS_VERSION}}"
+    "qt-deps ${QT_VERSION:-${CI_QT_VERSION}} ${MACOS_DEPS_VERSION:-${CI_DEPS_VERSION}}"
+    "cef ${MACOS_CEF_BUILD_VERSION:-${CI_MACOS_CEF_VERSION}}"
+    "vlc ${VLC_VERSION:-${CI_VLC_VERSION}}"
+    "libwebrtc ${LIBWEBRTC_VERSION}"
 )
 
 if [ -n "${TERM-}" ]; then
@@ -312,6 +312,7 @@ configure_obs_build() {
         -DBUILD_BROWSER=ON \
         -DWITH_RTMPS=ON \
         -DBUILD_NDI=ON \
+        -DBUILD_WEBSOCKET=OFF \
         -DCEF_ROOT_DIR="${DEPS_BUILD_DIR}/cef_binary_${MACOS_CEF_BUILD_VERSION}_macosx64" \
         -DCMAKE_BUILD_TYPE="${BUILD_CONFIG}" \
         -DOPENSSL_ROOT_DIR="/usr/local/opt/openssl" \
