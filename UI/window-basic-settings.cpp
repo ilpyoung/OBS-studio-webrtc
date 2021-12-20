@@ -835,6 +835,92 @@ OBSBasicSettings::OBSBasicSettings(QWidget *parent)
 	ui->basicSettingsButtonGroup->setId(ui->SettingsVideoButton, 4);
 	ui->basicSettingsButtonGroup->setId(ui->SettingsHotkeysButton, 5);
 	ui->basicSettingsButtonGroup->setId(ui->SettingsAdvancedButton, 6);
+
+	// QPushButton:hover{  \
+	// 	background-color: rgb(76, 76, 76); \
+	// }  \
+
+	ui->SettingsGeneralButton->setStyleSheet("\
+                QPushButton {   \
+                    border-radius: 0px;    \
+                }   \
+                QPushButton:checked{\
+                    background-color: rgb(121, 121, 121);\
+                }\
+                ");
+
+		ui->SettingsStreamButton->setStyleSheet("\
+                QPushButton {   \
+                    border-radius: 0px;    \
+                }   \
+                QPushButton:checked{\
+                    background-color: rgb(121, 121, 121);\
+                }\
+                ");
+
+		ui->SettingsOutputButton->setStyleSheet("\
+                QPushButton {   \
+                    border-radius: 0px;    \
+                }   \
+                QPushButton:checked{\
+                    background-color: rgb(121, 121, 121);\
+                }\
+                ");
+
+		ui->SettingsAudioButton->setStyleSheet("\
+                QPushButton {   \
+                    border-radius: 0px;    \
+                }   \
+                QPushButton:checked{\
+                    background-color: rgb(121, 121, 121);\
+                }\
+                ");
+
+		ui->SettingsVideoButton->setStyleSheet("\
+                QPushButton {   \
+                    border-radius: 0px;    \
+                }   \
+                QPushButton:checked{\
+                    background-color: rgb(121, 121, 121);\
+                }\
+                ");
+
+		ui->SettingsHotkeysButton->setStyleSheet("\
+                QPushButton {   \
+                    border-radius: 0px;    \
+                }   \
+                QPushButton:checked{\
+                    background-color: rgb(121, 121, 121);\
+                }\
+                ");
+
+		ui->SettingsAdvancedButton->setStyleSheet("\
+                QPushButton {   \
+                    border-radius: 0px;    \
+                }   \
+                QPushButton:checked{\
+                    background-color: rgb(121, 121, 121);\
+                }\
+                ");
+
+
+	// ui->SettingsGeneralButton->setStyleSheet("QPushButton{border-radius: 0px; }");
+	// ui->SettingsStreamButton->setStyleSheet("QPushButton{border-radius: 0px;}");
+	// ui->SettingsOutputButton->setStyleSheet("QPushButton{border-radius: 0px;}");
+	// ui->SettingsAudioButton->setStyleSheet("QPushButton{border-radius: 0px;}");
+	// ui->SettingsVideoButton->setStyleSheet("QPushButton{border-radius: 0px;}");
+	// ui->SettingsHotkeysButton->setStyleSheet("QPushButton{border-radius: 0px;}");
+	// ui->SettingsAdvancedButton->setStyleSheet("QPushButton{border-radius: 0px;}");
+
+	// ui->SettingsGeneralButton->setStyleSheet("QPushButton:checked { background-color: rgb(121, 121, 121); }");
+	// ui->SettingsStreamButton->setStyleSheet("QPushButton:checked { background-color: rgb(121, 121, 121); }");
+	// ui->SettingsOutputButton->setStyleSheet("QPushButton:checked { background-color: rgb(121, 121, 121); }");
+	// ui->SettingsAudioButton->setStyleSheet("QPushButton:checked { background-color: rgb(121, 121, 121); }");
+	// ui->SettingsVideoButton->setStyleSheet("QPushButton:checked { background-color: rgb(121, 121, 121); }");
+	// ui->SettingsHotkeysButton->setStyleSheet("QPushButton:checked { background-color: rgb(121, 121, 121); }");
+	// ui->SettingsAdvancedButton->setStyleSheet("QPushButton:checked { background-color: rgb(121, 121, 121); }");
+
+
 	connect(ui->basicSettingsButtonGroup, SIGNAL(buttonClicked(int)), this,
 		SLOT(SimpleRecordingEncoderChanged()));
 
