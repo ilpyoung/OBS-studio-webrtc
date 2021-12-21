@@ -56,7 +56,7 @@ bool CustomWebrtcImpl::open(const std::string &sdp,
 	conn->FollowRedirects(true);
 	// and limit the number of redirects (default is -1, unlimited)
 	conn->FollowRedirects(true, 3);
-	RestClient::Response r = conn->post(this->serverUrl, sdp);
+	RestClient::Response r = conn->post(this->serverUrl+"?codec="+video_codec.c_str(), sdp);
 	delete conn;
 	RestClient::disable();
 

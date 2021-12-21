@@ -6795,7 +6795,14 @@ void OBSBasic::StreamingStop(int code, QString last_error)
 		use_last_error = true;
 		errorDescription = Str("Output.ConnectFail.Error");
 		break;
-
+	case OBS_OUTPUT_ERROR_NO_CODEC:
+		use_last_error = true;
+		errorDescription = "서버에서 사용할 수 없는 코덱입니다. 맞는 코덱을 사용하여 주세요."//Str("Output.ConnectFail.Error");
+		break;
+	case OBS_OUTPUT_ERROR_OTHER_CASTING:
+		use_last_error = true;
+		errorDescription = "연결상태가 좋지 않거나, 동일 채널 다른 방송이 시작되어 송출이 중지되었습니다."//Str("Output.ConnectFail.Error");
+		break;
 	case OBS_OUTPUT_DISCONNECTED:
 		/* doesn't happen if output is set to reconnect.  note that
 		 * reconnects are handled in the output, not in the UI */
