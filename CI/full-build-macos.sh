@@ -35,6 +35,15 @@ set -eE
 ## SET UP ENVIRONMENT ##
 PRODUCT_NAME="OBS-Studio"
 
+##Apple Account Info
+CODESIGN_IDENT=
+CODESIGN_IDENT_SHORT=
+CODESIGN_IDENT_USER=
+CODESIGN_IDENT_PASS=
+NOTARIZE_APP_SPECIFIC_PASSWORD=
+##
+
+
 CHECKOUT_DIR="$(/usr/bin/git rev-parse --show-toplevel)"
 DEPS_BUILD_DIR="${CHECKOUT_DIR}/../obs-build-dependencies"
 BUILD_DIR="${BUILD_DIR:-build}"
@@ -218,25 +227,20 @@ install_cef() {
     hr "Building dependency CEF v${1}"
     ensure_dir "${DEPS_BUILD_DIR}"
     step "Download..."
-    ${CURLCMD} --progress-bar -L -C - -O https://cdn-fastly.obsproject.com/downloads/cef_binary_${1}_macosx64.tar.bz2
+    ${CURLCMD} --progress-bar -L -C - -O https://cdn-fastly.obsproject.com/downloads/cef_binary_${1}_macos_x86_64.tar.xz
     step "Unpack..."
-    /usr/bin/tar -xf ./cef_binary_${1}_macosx64.tar.bz2
-    cd ./cef_binary_${1}_macosx64
+    /usr/bin/tar -xf ./cef_binary_${1}_macos_x86_64.tar.xz
+    cd ./cef_binary_${1}_macos_x86_64
     step "Fix tests..."
     # remove a broken test
     /usr/bin/sed -i '.orig' '/add_subdirectory(tests\/ceftests)/d' ./CMakeLists.txt
-    /usr/bin/sed -i '.orig' s/\"10.10\"/\"${MIN_MACOS_VERSION}\"/ ./cmake/cef_variables.cmake
+    /usr/bin/sed -i '.orig' 's/"'$(test "${MACOS_CEF_BUILD_VERSION:-${CI_MACOS_CEF_VERSION}}" -le 3770 && echo "10.9" || echo "10.10")'"/"'${MIN_MACOS_VERSION:-${CI_MIN_MACOS_VERSION}}'"/' ./cmake/cef_variables.cmake
     ensure_dir ./build
     step "Run CMAKE..."
     cmake \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DDISABLE_PYTHON=ON \
-        -DBUILD_BROWSER=OFF \
-        -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
-        -DOPENSSL_LIBRARIES=/usr/local/opt/openssl/lib \
         -DCMAKE_CXX_FLAGS="-std=c++11 -stdlib=libc++ -Wno-deprecated-declarations"\
         -DCMAKE_EXE_LINKER_FLAGS="-std=c++11 -stdlib=libc++"\
-        -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
+        -DCMAKE_OSX_DEPLOYMENT_TARGET=${MIN_MACOS_VERSION:-${CI_MIN_MACOS_VERSION}} \
         ..
     step "Build..."
     /usr/bin/make -j${NPROC}
@@ -313,7 +317,7 @@ configure_obs_build() {
         -DWITH_RTMPS=ON \
         -DBUILD_NDI=ON \
         -DBUILD_WEBSOCKET=OFF \
-        -DCEF_ROOT_DIR="${DEPS_BUILD_DIR}/cef_binary_${MACOS_CEF_BUILD_VERSION}_macosx64" \
+        -DCEF_ROOT_DIR="${DEPS_BUILD_DIR}/cef_binary_${MACOS_CEF_BUILD_VERSION}_macos_x86_64" \
         -DCMAKE_BUILD_TYPE="${BUILD_CONFIG}" \
         -DOPENSSL_ROOT_DIR="/usr/local/opt/openssl" \
         -DOPENSSL_LIBRARIES="/usr/local/opt/openssl/lib" \
@@ -395,7 +399,7 @@ install_frameworks() {
 
     hr "Adding Chromium Embedded Framework"
     step "Copy Framework..."
-    /bin/cp -R "${DEPS_BUILD_DIR}/cef_binary_${MACOS_CEF_BUILD_VERSION}_macosx64/Release/Chromium Embedded Framework.framework" ./OBS-WebRTC.app/Contents/Frameworks/
+    /bin/cp -R "${DEPS_BUILD_DIR}/cef_binary_${MACOS_CEF_BUILD_VERSION}_macos_x86_64/Release/Chromium Embedded Framework.framework" ./OBS-WebRTC.app/Contents/Frameworks/
     /usr/sbin/chown -R $(whoami) ./OBS-WebRTC.app/Contents/Frameworks/
 }
 
@@ -513,13 +517,14 @@ read_codesign_pass() {
         /usr/bin/read -p "${COLOR_ORANGE}  + Apple account id: ${COLOR_RESET}" CODESIGN_IDENT_USER
         CODESIGN_IDENT_PASS=$(stty -echo; /usr/bin/read -p "${COLOR_ORANGE}  + Apple developer password: ${COLOR_RESET}" pwd; stty echo; /bin/echo $pwd)
         /bin/echo -n "${COLOR_ORANGE}"
-        /usr/bin/xcrun altool --store-password-in-keychain-item "OBS-app-specific-password" -u "${CODESIGN_IDENT_USER}" -p "${NOTARIZE_APP_SPECIFIC_PASSWORD}"
+        /usr/bin/xcrun altool --store-password-in-keychain-item "OBS-WebRTC" -u "${CODESIGN_IDENT_USER}" -p "${NOTARIZE_APP_SPECIFIC_PASSWORD}"
         /bin/echo -n "${COLOR_RESET}"
-        CODESIGN_IDENT_SHORT=$(/bin/echo "${CODESIGN_IDENT}" | /usr/bin/sed -En "s/.+\((.+)\)/\1/p")
+        #CODESIGN_IDENT_SHORT=$(/bin/echo "${CODESIGN_IDENT}" | /usr/bin/sed -En "s/.+\((.+)\)/\1/p")
     else
         step "Store app password in macOS keychain"
-        /usr/bin/xcrun altool --store-password-in-keychain-item "OBS-app-specific-password" -u "${CODESIGN_IDENT_USER}" -p "${NOTARIZE_APP_SPECIFIC_PASSWORD}"
-        CODESIGN_IDENT_SHORT=$(/bin/echo "${CODESIGN_IDENT}" | /usr/bin/sed -En "s/.+\((.+)\)/\1/p")
+        /usr/bin/xcrun altool --store-password-in-keychain-item "OBS-WebRTC" -u "${CODESIGN_IDENT_USER}" -p "${NOTARIZE_APP_SPECIFIC_PASSWORD}"
+        #CODESIGN_IDENT_SHORT=$(/bin/echo "${CODESIGN_IDENT}" | /usr/bin/sed -En "s/.+\((.+)\)/\1/p")
+        step $(/bin/echo "${CODESIGN_IDENT}" | /usr/bin/sed -En "s/.+\((.+)\)/\1/p")
     fi
 }
 
@@ -547,14 +552,16 @@ codesign_bundle() {
     # /usr/bin/codesign --force --options runtime --sign "${CODESIGN_IDENT}" --deep ./OBS-WebRTC.app/Contents/Frameworks/Sparkle.framework
     # /bin/echo -n "${COLOR_RESET}"
 
-    step "Code-sign CEF framework..."
+    step "Code-sign CEF framework..."+${COLOR_ORANGE}
     /bin/echo -n "${COLOR_ORANGE}"
     /usr/bin/codesign --force --timestamp --options runtime --entitlements "${CI_SCRIPTS}/app/entitlements.plist" --sign "${CODESIGN_IDENT}" "./OBS-WebRTC.app/Contents/Frameworks/Chromium Embedded Framework.framework/Libraries/libEGL.dylib"
     /usr/bin/codesign --force --timestamp --options runtime --entitlements "${CI_SCRIPTS}/app/entitlements.plist" --sign "${CODESIGN_IDENT}" "./OBS-WebRTC.app/Contents/Frameworks/Chromium Embedded Framework.framework/Libraries/libswiftshader_libEGL.dylib"
     /usr/bin/codesign --force --timestamp --options runtime --entitlements "${CI_SCRIPTS}/app/entitlements.plist" --sign "${CODESIGN_IDENT}" "./OBS-WebRTC.app/Contents/Frameworks/Chromium Embedded Framework.framework/Libraries/libGLESv2.dylib"
     /usr/bin/codesign --force --timestamp --options runtime --entitlements "${CI_SCRIPTS}/app/entitlements.plist" --sign "${CODESIGN_IDENT}" "./OBS-WebRTC.app/Contents/Frameworks/Chromium Embedded Framework.framework/Libraries/libswiftshader_libGLESv2.dylib"
     /usr/bin/codesign --force --timestamp --options runtime --entitlements "${CI_SCRIPTS}/app/entitlements.plist" --sign "${CODESIGN_IDENT}" "./OBS-WebRTC.app/Contents/Frameworks/Chromium Embedded Framework.framework/Libraries/libvk_swiftshader.dylib"
+    # /usr/bin/codesign --force --timestamp --options runtime --strict --entitlements "${CI_SCRIPTS}/app/entitlements.plist" --sign "${CODESIGN_IDENT}" --deep "./OBS-WebRTC.app/Contents/Frameworks/Chromium Embedded Framework.framework"
     /usr/bin/codesign --force --timestamp --options runtime --entitlements "${CI_SCRIPTS}/app/entitlements.plist" --sign "${CODESIGN_IDENT}" --deep "./OBS-WebRTC.app/Contents/Frameworks/Chromium Embedded Framework.framework"
+    # /usr/bin/codesign --verify --deep --strict --verbose=2 "./OBS-WebRTC.app/Contents/Frameworks/Chromium Embedded Framework.framework"
     /bin/echo -n "${COLOR_RESET}"
 
     step "Code-sign CEF helper apps..."
@@ -655,7 +662,7 @@ notarize_macos() {
     trap "caught_error 'notarizing app'" ERR
 
     ensure_dir "${CHECKOUT_DIR}/${BUILD_DIR}"
-
+    hr "Up Down"
     if [ -f "${FILE_NAME}" ]; then
         NOTARIZE_TARGET="${FILE_NAME}"
         xcnotary precheck "./OBS-WebRTC.app"
@@ -665,13 +672,12 @@ notarize_macos() {
         error "No notarization app bundle ('OBS-WebRTC.app') or disk image ('${FILE_NAME}') found"
         return
     fi
-
     if [ "$?" -eq 0 ]; then
         read_codesign_ident
         read_codesign_pass
 
         step "Run xcnotary with ${NOTARIZE_TARGET}..."
-        xcnotary notarize "${NOTARIZE_TARGET}" --developer-account "${CODESIGN_IDENT_USER}" --developer-password-keychain-item "OBS-app-specific-password" --provider "${CODESIGN_IDENT_SHORT}"
+        xcnotary notarize "${NOTARIZE_TARGET}" --developer-account "${CODESIGN_IDENT_USER}" --developer-password-keychain-item "OBS-WebRTC" --provider "${CODESIGN_IDENT_SHORT}"
     fi
 }
 
