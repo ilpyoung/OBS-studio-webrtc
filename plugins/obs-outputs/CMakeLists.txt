@@ -57,18 +57,21 @@ set(obs-outputs_webrtc_HEADERS
 	AudioDeviceModuleWrapper.h
 	millicast-stream.h
 	webrtc-custom-stream.h
-        obsWebrtcAudioSource.h
+    obsWebrtcAudioSource.h
 	SDPModif.h
 	VideoCapturer.h
 	WebRTCStream.h
-       )
+	WebRTCSubStream.h
+    )
+	
 set(obs-outputs_webrtc_SOURCES
 	AudioDeviceModuleWrapper.cpp
 	millicast-stream.cpp
 	webrtc-custom-stream.cpp
-        obsWebrtcAudioSource.cpp
+    obsWebrtcAudioSource.cpp
 	VideoCapturer.cpp
 	WebRTCStream.cpp
+	WebRTCSubStream.cpp
 	)
 
 if(NOT WIN32)

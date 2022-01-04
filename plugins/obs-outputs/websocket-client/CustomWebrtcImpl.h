@@ -24,9 +24,15 @@ public:
 	// WebsocketClient::Listener implementation
 	bool connect(const std::string &publish_api_url,
 		     WebsocketClient::Listener *listener) override;
-	bool open(const std::string &sdp, const std::string &video_codec,
+	bool open(const std::string &sdp, 
+		  const std::string &video_codec,
 		  const std::string &audio_codec,
 		  const std::string &stream_name) override;
+	bool open(const std::string &sdp, 
+		  const std::string &video_codec,
+		  const std::string &audio_codec,
+		  const std::string &stream_name,
+		  bool multi) override;
 	bool trickle(const std::string & /* mid */, int /* index */,
 		     const std::string & /* candidate */,
 		     bool /* last */) override;

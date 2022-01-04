@@ -43,6 +43,15 @@ bool CustomWebrtcImpl::open(const std::string &sdp,
 			    const std::string &audio_codec,
 			    const std::string &stream_name)
 {
+	return open(sdp, video_codec, audio_codec, stream_name, false);
+}
+
+bool CustomWebrtcImpl::open(const std::string &sdp,
+			    const std::string &video_codec,
+			    const std::string &audio_codec,
+			    const std::string &stream_name,
+				bool multi)
+{
 	info("WS-OPEN: stream_name: %s", stream_name.c_str());
 
 	RestClient::Connection *conn = new RestClient::Connection("");
@@ -56,7 +65,7 @@ bool CustomWebrtcImpl::open(const std::string &sdp,
 	conn->FollowRedirects(true);
 	// and limit the number of redirects (default is -1, unlimited)
 	conn->FollowRedirects(true, 3);
-	RestClient::Response r = conn->post(this->serverUrl+"?codec="+video_codec.c_str(), sdp);
+	RestClient::Response r = conn->post(this->serverUrl+"?codec="+video_codec.c_str()+"&multi="+(multi ? "true" : "false"), sdp);
 	delete conn;
 	RestClient::disable();
 

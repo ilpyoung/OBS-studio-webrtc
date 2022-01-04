@@ -21,7 +21,7 @@
 #define OPT_LOWLATENCY_ENABLED "low_latency_mode_enabled"
 
 #include "WebRTCStream.h"
-
+#include "WebRTCSubStream.h"
 extern "C" const char *millicast_stream_getname(void *unused)
 {
 	info("millicast_stream_getname");
@@ -38,11 +38,28 @@ extern "C" void millicast_stream_destroy(void *data)
 	stream->stop();
 	//Remove ref and let it self destroy
 	stream->Release();
+	if(multi_codec){
+		mt1_stream->stop();
+		mt2_stream->stop();
+		mt1_stream->Release();
+		mt2_stream->Release();
+		mt1_stream = nullptr;
+		mt2_stream = nullptr;
+		multi_codec = false;
+	}
 }
 
 extern "C" void *millicast_stream_create(obs_data_t *, obs_output_t *output)
 {
-	info("millicast_stream_create");
+	info("WebRTC_stream_create");
+    obs_service_t *service = obs_output_get_service(output);
+    std::string video_codec = obs_service_get_codec(service) ? obs_service_get_codec(service) : "";
+	if(strcmp(video_codec, "h264") == 0) {
+		multi_codec = true;
+		video_codec = "VP9";
+		mt1_stream = new WebRTCSubStream(output, "h264");
+		mt2_stream = new WebRTCSubStream(output, "AV1");
+	}
 	// Create new stream
 	WebRTCStream *stream = new WebRTCStream(output);
 	// Don't allow it to be deleted
@@ -63,16 +80,29 @@ extern "C" void millicast_stream_stop(void *data, uint64_t ts)
 	stream->stop();
 	// Remove ref and let it self destroy
 	stream->Release();
+	if(multi_codec){
+		mt1_stream->stop();
+		mt2_stream->stop();
+		mt1_stream->Release();
+		mt2_stream->Release();
+		mt1_stream = nullptr;
+		mt2_stream = nullptr;
+		multi_codec = false;
+	}
 }
 
 extern "C" bool millicast_stream_start(void *data)
 {
-	info("millicast_stream_start");
+	info("Webrtc_stream_start");
 	//Get stream
 	WebRTCStream *stream = (WebRTCStream *)data;
 	//Don't allow it to be deleted
 	stream->AddRef();
 	//Start it
+	if(multi_codec){
+		mt1_stream->start(WebRTCStream::Type::CustomWebrtc);
+		mt2_stream->start(WebRTCStream::Type::CustomWebrtc);
+	}
 	return stream->start(WebRTCStream::Type::Millicast);
 }
 
@@ -81,6 +111,10 @@ extern "C" void millicast_receive_video(void *data, struct video_data *frame)
 	//Get stream
 	WebRTCStream *stream = (WebRTCStream *)data;
 	//Process audio
+	if(multi_codec){
+		mt1_stream->onVideoFrame(frame);
+		mt2_stream->onVideoFrame(frame);
+	}
 	stream->onVideoFrame(frame);
 }
 extern "C" void millicast_receive_audio(void *data, struct audio_data *frame)
@@ -88,6 +122,10 @@ extern "C" void millicast_receive_audio(void *data, struct audio_data *frame)
 	//Get stream
 	WebRTCStream *stream = (WebRTCStream *)data;
 	//Process audio
+	// if(multi_codec){
+	// 	mt1_stream->onAudioFrame(frame);
+	// 	mt2_stream->onAudioFrame(frame);
+	// }
 	stream->onAudioFrame(frame);
 }
 
