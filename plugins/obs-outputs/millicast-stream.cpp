@@ -22,6 +22,10 @@
 
 #include "WebRTCStream.h"
 #include "WebRTCSubStream.h"
+
+WebRTCSubStream *mt1_stream = nullptr;
+WebRTCSubStream *mt2_stream = nullptr;
+bool multi_codec = false;
 extern "C" const char *millicast_stream_getname(void *unused)
 {
 	info("millicast_stream_getname");
@@ -54,7 +58,7 @@ extern "C" void *millicast_stream_create(obs_data_t *, obs_output_t *output)
 	info("WebRTC_stream_create");
     obs_service_t *service = obs_output_get_service(output);
     std::string video_codec = obs_service_get_codec(service) ? obs_service_get_codec(service) : "";
-	if(strcmp(video_codec, "h264") == 0) {
+	if (video_codec == "h264") {
 		multi_codec = true;
 		video_codec = "VP9";
 		mt1_stream = new WebRTCSubStream(output, "h264");

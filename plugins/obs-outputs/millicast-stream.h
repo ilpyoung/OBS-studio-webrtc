@@ -51,9 +51,6 @@ struct droptest_info {
 
 struct millicast_stream {
 	obs_output_t *output;
-	WebRTCStream *mt1_stream = nullptr;
-	WebRTCStream *mt2_stream = nullptr;
-	bool multi_codec = false
 	pthread_mutex_t packets_mutex;
 	struct circlebuf packets;
 	bool sent_headers;
