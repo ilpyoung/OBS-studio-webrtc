@@ -76,7 +76,7 @@ static bool use_auth_modified(obs_properties_t *ppts, obs_property_t *p,
 	obs_property_set_visible(p, false);
 
 	p = obs_properties_get(ppts, "username");
-	obs_property_set_visible(p, true);
+	obs_property_set_visible(p, false);
 
 	p = obs_properties_get(ppts, "password");
 	obs_property_set_visible(p, true);
@@ -137,7 +137,7 @@ static obs_properties_t *webrtc_millicast_properties(void *unused)
 	obs_property_set_visible(p, false);
 
 	p = obs_properties_get(ppts, "username");
-	obs_property_set_visible(p, true);
+	obs_property_set_visible(p, false);
 
 	p = obs_properties_get(ppts, "password");
 	obs_property_set_visible(p, true);

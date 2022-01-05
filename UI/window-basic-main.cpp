@@ -77,6 +77,10 @@
 #include "windows.h"
 #endif
 
+#ifdef __APPLE__
+#include <unistd.h>
+#endif
+
 #include "ui_OBSBasic.h"
 #include "ui_ColorSelect.h"
 
