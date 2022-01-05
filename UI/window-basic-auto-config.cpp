@@ -641,8 +641,7 @@ void AutoConfigStreamPage::ServiceChanged()
 	ui->streamkeyPageLayout->removeWidget(ui->serverStackedWidget);
 
 	if (custom) {
-		ui->streamkeyPageLayout->insertRow(1, ui->serverLabel,
-						   ui->serverStackedWidget);
+		//ui->streamkeyPageLayout->insertRow(1, ui->serverLabel, ui->serverStackedWidget);
 
 		ui->region->setVisible(false);
 		ui->serverStackedWidget->setCurrentIndex(1);

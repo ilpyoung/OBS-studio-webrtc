@@ -901,6 +901,17 @@ void OBSBasicSettings::on_authPwShow_clicked()
 
 }
 
+void OBSBasicSettings::on_userPwShow_clicked()
+{
+	if (ui->userPw->echoMode() == QLineEdit::Password) {
+		ui->userPw->setEchoMode(QLineEdit::Normal);
+		ui->userPwShow->setText(QTStr("숨기기"));
+	} else {
+		ui->userPw->setEchoMode(QLineEdit::Password);
+		ui->userPwShow->setText(QTStr("보이기"));
+	}
+}
+
 OBSService OBSBasicSettings::SpawnTempService()
 {
 	bool custom = IsCustomService();
