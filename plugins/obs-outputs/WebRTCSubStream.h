@@ -1,6 +1,6 @@
-#ifndef _WEBRTCSTREAM_H_
-#define _WEBRTCSTREAM_H_
-
+#pragma once
+#ifndef _WEBRTCSUBSTREAM_H_
+#define _WEBRTCSUBSTREAM_H_
 #if WIN32
 #pragma comment(lib, "Strmiids.lib")
 #pragma comment(lib, "Secur32.lib")
@@ -9,6 +9,8 @@
 #pragma comment(lib, "wmcodecdspuuid.lib")
 #pragma comment(lib, "amstrmid.lib")
 #endif
+
+#include "obs.h"
 
 // obs-webrtc includes
 #include "websocket-client/WebsocketClient.h"
@@ -37,7 +39,7 @@
 #include <chrono>
 #include <thread>
 
-class WebRTCStreamInterface
+class WebRTCStreamInterface1
 	: public WebsocketClient::Listener,
 	  public webrtc::PeerConnectionObserver,
 	  public webrtc::CreateSessionDescriptionObserver,
@@ -45,15 +47,14 @@ class WebRTCStreamInterface
 	  public webrtc::SetRemoteDescriptionObserverInterface {
 };
 
-class WebRTCStream : public rtc::RefCountedObject<WebRTCStreamInterface> {
+class WebRTCSubStream : public rtc::RefCountedObject<WebRTCStreamInterface1> {
 public:
-	enum Type { Millicast = 0, CustomWebrtc = 1 };
 
 	WebRTCSubStream(obs_output_t *output, const std::string &v_codec);
 	~WebRTCSubStream() override;
 
 	bool close(bool wait);
-	bool start(Type type);
+	bool start();
 	bool stop();
 	void onAudioFrame(audio_data *frame);
 	void onVideoFrame(video_data *frame);

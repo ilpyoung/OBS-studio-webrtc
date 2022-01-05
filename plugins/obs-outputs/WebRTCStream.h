@@ -1,3 +1,5 @@
+
+#pragma once
 #ifndef _WEBRTCSTREAM_H_
 #define _WEBRTCSTREAM_H_
 

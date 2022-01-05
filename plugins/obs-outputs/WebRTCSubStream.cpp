@@ -1,6 +1,6 @@
 // Copyright Dr. Alex. Gouaillard (2015, 2020)
 
-#include "WebRTCStream.h"
+#include "WebRTCSubStream.h"
 #include "SDPModif.h"
 
 #include "media-io/video-io.h"
@@ -14,7 +14,7 @@
 #include "common_video/libyuv/include/webrtc_libyuv.h"
 #include "pc/rtc_stats_collector.h"
 #include "rtc_base/checks.h"
-#include <libyuv.h>
+#include <third_party\libyuv\include\libyuv.h>
 
 #include <algorithm>
 #include <chrono>
@@ -52,7 +52,7 @@ private:
     rtc::scoped_refptr<const webrtc::RTCStatsReport> report_;
 };
 
-class CustomLogger : public rtc::LogSink {
+class CustomLogger1 : public rtc::LogSink {
 public:
     void OnLogMessage(const std::string &message) override
     {
@@ -60,14 +60,15 @@ public:
     }
 };
 
-CustomLogger logger;
+CustomLogger1 logger;
 
-WebRTCStream::WebRTCStream(obs_output_t *output, const std::string &v_codec)
+WebRTCSubStream::WebRTCSubStream(obs_output_t *output,
+				 const std::string &v_codec)
 {
     rtc::LogMessage::RemoveLogToStream(&logger);
     rtc::LogMessage::AddLogToStream(&logger,
                     rtc::LoggingSeverity::LS_VERBOSE);
-
+    video_codec = v_codec;
     resetStats();
 
     audio_bitrate = 128;
@@ -107,7 +108,7 @@ WebRTCStream::WebRTCStream(obs_output_t *output, const std::string &v_codec)
     videoCapturer = new rtc::RefCountedObject<VideoCapturer>();
 }
 
-WebRTCStream::~WebRTCStream()
+WebRTCSubStream::~WebRTCSubStream()
 {
     rtc::LogMessage::RemoveLogToStream(&logger);
 
@@ -133,7 +134,7 @@ WebRTCStream::~WebRTCStream()
     signaling.release();
 }
 
-void WebRTCStream::resetStats()
+void WebRTCSubStream::resetStats()
 {
     stats_list_ = "";
     frame_id_ = 0;
@@ -161,9 +162,9 @@ void WebRTCStream::resetStats()
     previous_frames_sent_ = 0;
 }
 
-bool WebRTCStream::start(WebRTCStream::Type type)
+bool WebRTCSubStream::start()
 {
-    info("WebRTCStream::start");
+    info("WebRTCSubStream::start");
     this->type = type;
 
     resetStats();
@@ -195,9 +196,6 @@ bool WebRTCStream::start(WebRTCStream::Type type)
 //  password = obs_service_get_password(service)
 //             ? obs_service_get_password(service)
 //             : "";
-    video_codec = obs_service_get_codec(service)
-                  ? obs_service_get_codec(service)
-                  : "";
     // #271 do not list video codec H264 if it is not available in libwebrtc
 #ifdef DISABLE_WEBRTC_H264
     if ("h264" == video_codec) {
@@ -337,20 +335,20 @@ bool WebRTCStream::start(WebRTCStream::Type type)
 
     stream = factory->CreateLocalMediaStream("obs");
 
-    // audio_source = obsWebrtcAudioSource::Create(&options);
-    // audio_track = factory->CreateAudioTrack("audio", audio_source);
-    // // pc->AddTrack(audio_track, {"obs"});
-    // stream->AddTrack(audio_track);
+     audio_source = obsWebrtcAudioSource::Create(&options);
+     audio_track = factory->CreateAudioTrack("audio", audio_source);
+     pc->AddTrack(audio_track, {"obs"});
+     stream->AddTrack(audio_track);
 
     video_track = factory->CreateVideoTrack("video", videoCapturer);
     // pc->AddTrack(video_track, {"obs"});
     stream->AddTrack(video_track);
 
     //Add audio track
-    // webrtc::RtpTransceiverInit audio_init;
-    // audio_init.stream_ids.push_back(stream->id());
-    // audio_init.direction = webrtc::RtpTransceiverDirection::kSendOnly;
-    // pc->AddTransceiver(audio_track, audio_init);
+     webrtc::RtpTransceiverInit audio_init;
+     audio_init.stream_ids.push_back(stream->id());
+     audio_init.direction = webrtc::RtpTransceiverDirection::kSendOnly;
+     pc->AddTransceiver(audio_track, audio_init);
 
     //Add video track
     webrtc::RtpTransceiverInit video_init;
@@ -414,22 +412,22 @@ bool WebRTCStream::start(WebRTCStream::Type type)
     return true;
 }
 
-void WebRTCStream::onConnected()
+void WebRTCSubStream::onConnected()
 {
-    info("WebRTCStream::onConnected");
+    info("WebRTCSubStream::onConnected");
 }
 
-void WebRTCStream::onLogged(int /* code */)
+void WebRTCSubStream::onLogged(int /* code */)
 {
-    info("WebRTCStream::onLogged\nCreating offer...");
+    info("WebRTCSubStream::onLogged\nCreating offer...");
     webrtc::PeerConnectionInterface::RTCOfferAnswerOptions offer_options;
     offer_options.voice_activity_detection = false;
     pc->CreateOffer(this, offer_options);
 }
 
-void WebRTCStream::OnSuccess(webrtc::SessionDescriptionInterface *desc)
+void WebRTCSubStream::OnSuccess(webrtc::SessionDescriptionInterface *desc)
 {
-    info("WebRTCStream::OnSuccess\n");
+    info("WebRTCSubStream::OnSuccess\n");
     std::string sdp;
     desc->ToString(&sdp);
 
@@ -458,6 +456,8 @@ void WebRTCStream::OnSuccess(webrtc::SessionDescriptionInterface *desc)
                    audio_codec, video_codec == "AV1" ? "AV1X" : video_codec, 1, "42e01f", 0);
     // Constrain video bitrate
     SDPModif::bitrateMaxMinSDP(sdpCopy, video_bitrate, video_payloads);
+
+    SDPModif::stereoSDP(sdpCopy, audio_bitrate);
     // Enable stereo & constrain audio bitrate
     // NOTE ALEX: check that it does not incorrectly detect multiopus as opus
     // SDPModif::stereoSDP(sdpCopy, audio_bitrate);
@@ -480,21 +480,21 @@ void WebRTCStream::OnSuccess(webrtc::SessionDescriptionInterface *desc)
     }
 }
 
-void WebRTCStream::OnSuccess()
+void WebRTCSubStream::OnSuccess()
 {
     info("Local Description set\n");
 }
 
-void WebRTCStream::OnFailure(webrtc::RTCError error)
+void WebRTCSubStream::OnFailure(webrtc::RTCError error)
 {
-    warn("WebRTCStream::OnFailure [%s]", error.message());
+    warn("WebRTCSubStream::OnFailure [%s]", error.message());
     // Shutdown websocket connection and close Peer Connection
     close(false);
     // Disconnect, this will call stop on main thread
     // obs_output_signal_stop(output, OBS_OUTPUT_ERROR);
 }
 
-void WebRTCStream::OnIceCandidate(const webrtc::IceCandidateInterface *candidate)
+void WebRTCSubStream::OnIceCandidate(const webrtc::IceCandidateInterface *candidate)
 {
     std::string str;
     candidate->ToString(&str);
@@ -503,12 +503,12 @@ void WebRTCStream::OnIceCandidate(const webrtc::IceCandidateInterface *candidate
             false);
 }
 
-void WebRTCStream::OnIceConnectionChange(
+void WebRTCSubStream::OnIceConnectionChange(
     webrtc::PeerConnectionInterface::IceConnectionState
         state /* new_state */)
 {
     using namespace webrtc;
-    info("WebRTCStream::OnIceConnectionChange [%u]", state);
+    info("WebRTCSubStream::OnIceConnectionChange [%u]", state);
 
     switch (state) {
     case PeerConnectionInterface::IceConnectionState::kIceConnectionFailed: {
@@ -533,11 +533,11 @@ void WebRTCStream::OnIceConnectionChange(
     }
 }
 
-void WebRTCStream::OnConnectionChange(
+void WebRTCSubStream::OnConnectionChange(
     webrtc::PeerConnectionInterface::PeerConnectionState state)
 {
     using namespace webrtc;
-    info("WebRTCStream::OnConnectionChange [%u]", state);
+    info("WebRTCSubStream::OnConnectionChange [%u]", state);
 
     switch (state) {
     case PeerConnectionInterface::PeerConnectionState::kFailed: {
@@ -563,7 +563,7 @@ void WebRTCStream::OnConnectionChange(
     }
 }
 
-void WebRTCStream::onRemoteIceCandidate(const std::string &sdpData)
+void WebRTCSubStream::onRemoteIceCandidate(const std::string &sdpData)
 {
     if (sdpData.empty()) {
         info("ICE COMPLETE\n");
@@ -589,7 +589,7 @@ void WebRTCStream::onRemoteIceCandidate(const std::string &sdpData)
     }
 }
 
-void WebRTCStream::onOpened(const std::string &sdp)
+void WebRTCSubStream::onOpened(const std::string &sdp)
 {
     info("ANSWER:\n\n%s\n", sdp.c_str());
 
@@ -623,7 +623,7 @@ void WebRTCStream::onOpened(const std::string &sdp)
     obs_output_begin_data_capture(output, 0);
 }
 
-void WebRTCStream::OnSetRemoteDescriptionComplete(webrtc::RTCError error)
+void WebRTCSubStream::OnSetRemoteDescriptionComplete(webrtc::RTCError error)
 {
     if (error.ok())
         info("Remote Description set\n");
@@ -640,7 +640,7 @@ void WebRTCStream::OnSetRemoteDescriptionComplete(webrtc::RTCError error)
     }
 }
 
-bool WebRTCStream::close(bool wait)
+bool WebRTCSubStream::close(bool wait)
 {
     if (!pc.get())
         return false;
@@ -657,9 +657,9 @@ bool WebRTCStream::close(bool wait)
     return true;
 }
 
-bool WebRTCStream::stop()
+bool WebRTCSubStream::stop()
 {
-    info("WebRTCStream::stop");
+    info("WebRTCSubStream::stop");
     // Shutdown websocket connection and close Peer Connection
     close(true);
     // Disconnect, this will call stop on main thread
@@ -667,9 +667,9 @@ bool WebRTCStream::stop()
     return true;
 }
 
-void WebRTCStream::onDisconnected()
+void WebRTCSubStream::onDisconnected()
 {
-    info("WebRTCStream::onDisconnected");
+    info("WebRTCSubStream::onDisconnected");
 
     // are we done retrying?
     if (thread_closeAsync.joinable())
@@ -687,9 +687,9 @@ void WebRTCStream::onDisconnected()
     });
 }
 
-void WebRTCStream::onLoggedError(int code)
+void WebRTCSubStream::onLoggedError(int code)
 {
-    info("WebRTCStream::onLoggedError [code: %d]", code);
+    info("WebRTCSubStream::onLoggedError [code: %d]", code);
     // Shutdown websocket connection and close Peer Connection
     close(false);
     // Disconnect, this will call stop on main thread
@@ -703,9 +703,9 @@ void WebRTCStream::onLoggedError(int code)
     // thread.detach();
 }
 
-void WebRTCStream::onOpenedError(int code)
+void WebRTCSubStream::onOpenedError(int code)
 {
-    info("WebRTCStream::onOpenedError [code: %d]", code);
+    info("WebRTCSubStream::onOpenedError [code: %d]", code);
     // Shutdown websocket connection and close Peer Connection
     close(false);
     // Disconnect, this will call stop on main thread
@@ -715,7 +715,7 @@ void WebRTCStream::onOpenedError(int code)
     // thread.detach();
 }
 
-void WebRTCStream::onAudioFrame(audio_data *frame)
+void WebRTCSubStream::onAudioFrame(audio_data *frame)
 {
     if (!frame)
         return;
@@ -723,7 +723,7 @@ void WebRTCStream::onAudioFrame(audio_data *frame)
     audio_source->OnAudioData(frame);
 }
 
-void WebRTCStream::onVideoFrame(video_data *frame)
+void WebRTCSubStream::onVideoFrame(video_data *frame)
 {
     if (!frame)
         return;
@@ -788,7 +788,7 @@ void WebRTCStream::onVideoFrame(video_data *frame)
 }
 
 // NOTE LUDO: #80 add getStats
-void WebRTCStream::getStats()
+void WebRTCSubStream::getStats()
 {
     auto reports = NewGetStats();
     if (reports.empty()) {
@@ -1056,7 +1056,7 @@ void WebRTCStream::getStats()
 }
 
 std::vector<rtc::scoped_refptr<const webrtc::RTCStatsReport>>
-WebRTCStream::NewGetStats()
+WebRTCSubStream::NewGetStats()
 {
     webrtc::MutexLock lock(&crit_);
 

@@ -14,7 +14,7 @@
 #include "common_video/libyuv/include/webrtc_libyuv.h"
 #include "pc/rtc_stats_collector.h"
 #include "rtc_base/checks.h"
-#include <libyuv.h>
+#include <third_party\libyuv\include\libyuv.h>
 
 #include <algorithm>
 #include <chrono>
@@ -198,6 +198,8 @@ bool WebRTCStream::start(WebRTCStream::Type type)
     video_codec = obs_service_get_codec(service)
                   ? obs_service_get_codec(service)
                   : "";
+    if (video_codec == "h264") // == "multi" ==> VP9
+	    video_codec = "VP9";
     // #271 do not list video codec H264 if it is not available in libwebrtc
 #ifdef DISABLE_WEBRTC_H264
     if ("h264" == video_codec) {
