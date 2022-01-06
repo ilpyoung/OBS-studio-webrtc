@@ -387,6 +387,8 @@ void OBSBasicSettings::SaveStream1Settings()
 				    QT_TO_UTF8(ui->userId->text()));	
 		obs_data_set_string(settings, "userPw",
 					QT_TO_UTF8(ui->userPw->text()));			
+		obs_data_set_string(settings, "bitrateMin",
+					QT_TO_UTF8(ui->simpleOutputVBitrateMin->text()));	
 		obs_data_set_string(settings, "room",
 				    QT_TO_UTF8(ui->room->text()));
 		obs_data_set_string(
@@ -409,6 +411,8 @@ void OBSBasicSettings::SaveStream1Settings()
 				    QT_TO_UTF8(ui->userId->text()));
 		obs_data_set_string(settings, "userPw",
 					QT_TO_UTF8(ui->userPw->text()));	
+		obs_data_set_string(settings, "bitrateMin",
+					QT_TO_UTF8(ui->simpleOutputVBitrateMin->text()));	
 		obs_data_set_string(
 			settings, "protocol",
 			QT_TO_UTF8(ui->streamProtocol->currentText()));

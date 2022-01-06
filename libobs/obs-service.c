@@ -267,6 +267,16 @@ const char *obs_service_get_userPw(const obs_service_t *service)
 	return service->info.get_user_pw(service->context.data);
 }
 
+const char *obs_service_get_bitrateMin(const obs_service_t *service)
+{
+	if (!obs_service_valid(service, "obs_service_get_bitrateMin"))
+		return NULL;
+
+	if (!service->info.get_bitrate_min)
+		return NULL;
+	return service->info.get_bitrate_min(service->context.data);
+}
+
 const char *obs_service_get_key(const obs_service_t *service)
 {
 	if (!obs_service_valid(service, "obs_service_get_key"))

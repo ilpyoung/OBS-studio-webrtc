@@ -398,7 +398,7 @@
      <item>
       <widget class="QStackedWidget" name="settingsPages">
        <property name="currentIndex">
-        <number>2</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="generalPage">
         <layout class="QVBoxLayout" name="verticalLayout_18">
@@ -1356,7 +1356,7 @@
                  <item>
                   <widget class="QRadioButton" name="h264RadioButton">
                    <property name="text">
-                    <string>h264</string>
+                    <string>H264</string>
                    </property>
                    <attribute name="buttonGroup">
                     <string notr="true">codecButtonGroup</string>

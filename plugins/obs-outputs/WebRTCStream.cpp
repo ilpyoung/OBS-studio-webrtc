@@ -226,6 +226,14 @@ bool WebRTCStream::start(WebRTCStream::Type type)
                 ? obs_service_get_userPw(service)
                 : "";
 
+    video_bitrate_min = obs_service_get_bitrateMin(service)
+                ? obs_service_get_bitrateMin(service)
+                : "";    
+
+
+    info("userId: %s", userId.c_str());
+    info("userPw: %s", userPw.c_str());
+
     // No Simulast for VP9 codec (not supported properly by libwebrtc)
     if (video_codec.empty() || "VP9" == video_codec) {
         info("Simulcast not supported properly for VP9: Disabling Simulcast\n");
@@ -278,6 +286,9 @@ bool WebRTCStream::start(WebRTCStream::Type type)
     video_bitrate = (int)obs_data_get_int(vsettings, "bitrate");
     obs_data_release(vsettings);
 
+    info("video_bitrate: %d", video_bitrate);
+    info("video_bitrate_min: %s", video_bitrate_min.c_str());
+    
     struct obs_audio_info audio_info;
     if (!obs_get_audio_info(&audio_info)) {
         warn("Failed to load audio settings.  Defaulting to opus.");
