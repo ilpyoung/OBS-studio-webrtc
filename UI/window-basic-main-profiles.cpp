@@ -311,7 +311,7 @@ bool OBSBasic::CreateProfile(const std::string &newName, bool create_new,
 
 	blog(LOG_INFO, "Created profile '%s' (%s, %s)", newName.c_str(),
 	     create_new ? "clean" : "duplicate", newDir.c_str());
-	blog(LOG_INFO, "------------------------------------------------");
+	blog(LOG_INFO, "------------------------------------------------1");
 
 	config_save_safe(App()->GlobalConfig(), "tmp", nullptr);
 	UpdateTitleBar();
@@ -391,9 +391,9 @@ void OBSBasic::DeleteProfile(const char *profileName, const char *profileDir)
 
 	os_rmdir(profilePath);
 
-	blog(LOG_INFO, "------------------------------------------------");
+	blog(LOG_INFO, "------------------------------------------------2");
 	blog(LOG_INFO, "Removed profile '%s' (%s)", profileName, profileDir);
-	blog(LOG_INFO, "------------------------------------------------");
+	blog(LOG_INFO, "------------------------------------------------3");
 }
 
 void OBSBasic::DeleteProfile(const QString &profileName)
@@ -585,7 +585,7 @@ void OBSBasic::on_actionRemoveProfile_triggered(bool skipConfirmation)
 
 	blog(LOG_INFO, "Switched to profile '%s' (%s)", newName.c_str(),
 	     newDir);
-	blog(LOG_INFO, "------------------------------------------------");
+	blog(LOG_INFO, "------------------------------------------------4");
 
 	UpdateTitleBar();
 
@@ -750,7 +750,7 @@ void OBSBasic::ChangeProfile()
 	CheckForSimpleModeX264Fallback();
 
 	blog(LOG_INFO, "Switched to profile '%s' (%s)", newName, newDir);
-	blog(LOG_INFO, "------------------------------------------------");
+	blog(LOG_INFO, "------------------------------------------------5");
 
 	if (api)
 		api->on_event(OBS_FRONTEND_EVENT_PROFILE_CHANGED);

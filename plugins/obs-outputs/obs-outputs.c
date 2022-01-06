@@ -71,7 +71,7 @@ bool obs_module_load(void)
 	mbedtls_threading_set_alt(mbed_mutex_init, mbed_mutex_free,
 				  mbed_mutex_lock, mbed_mutex_unlock);
 #endif
-
+	blog(LOG_INFO, "------------------------------------------------0");
 	obs_register_output(&rtmp_output_info);
 	obs_register_output(&null_output_info);
 	obs_register_output(&flv_output_info);
