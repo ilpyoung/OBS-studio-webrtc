@@ -198,7 +198,7 @@ bool WebRTCStream::start(WebRTCStream::Type type)
     video_codec = obs_service_get_codec(service)
                   ? obs_service_get_codec(service)
                   : "";
-    if (video_codec == "h264") // == "multi" ==> VP9
+    if (video_codec == "multi") // == "multi" ==> VP9
 	    video_codec = "VP9";
     // #271 do not list video codec H264 if it is not available in libwebrtc
 #ifdef DISABLE_WEBRTC_H264
