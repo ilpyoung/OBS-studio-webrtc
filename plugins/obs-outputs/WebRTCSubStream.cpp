@@ -215,7 +215,9 @@ bool WebRTCSubStream::start()
     if (publishApiUrl.empty()) {
         publishApiUrl = url;
     }
-
+    video_bitrate_min = obs_service_get_bitrateMin(service)
+				? obs_service_get_bitrateMin(service)
+				: "";   
     // No Simulast for VP9 codec (not supported properly by libwebrtc)
     if (video_codec.empty() || "VP9" == video_codec) {
         info("Simulcast not supported properly for VP9: Disabling Simulcast\n");
@@ -455,7 +457,7 @@ void WebRTCSubStream::OnSuccess(webrtc::SessionDescriptionInterface *desc)
                    // the packaging mode needs to be 1
                    audio_codec, video_codec == "AV1" ? "AV1X" : video_codec, 1, "42e01f", 0);
     // Constrain video bitrate
-    SDPModif::bitrateMaxMinSDP(sdpCopy, video_bitrate, video_payloads);
+    SDPModif::bitrateMaxMinSDP(sdpCopy, video_bitrate, video_payloads, video_bitrate_min);
 
     SDPModif::stereoSDP(sdpCopy, audio_bitrate);
     // Enable stereo & constrain audio bitrate

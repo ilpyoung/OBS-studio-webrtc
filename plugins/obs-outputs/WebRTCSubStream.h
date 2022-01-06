@@ -183,6 +183,7 @@ private:
 	std::string video_codec;
 	bool simulcast;
 	std::string publishApiUrl;
+	std::string video_bitrate_min;
 	int channel_count;
 
 	void resetStats();

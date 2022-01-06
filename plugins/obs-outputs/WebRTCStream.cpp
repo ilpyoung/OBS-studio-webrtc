@@ -229,8 +229,8 @@ bool WebRTCStream::start(WebRTCStream::Type type)
                 : "";
 
     video_bitrate_min = obs_service_get_bitrateMin(service)
-                ? obs_service_get_bitrateMin(service)
-                : "";    
+				? obs_service_get_bitrateMin(service)
+				: "";
 
 
     info("userId: %s", userId.c_str());
@@ -478,7 +478,7 @@ void WebRTCStream::OnSuccess(webrtc::SessionDescriptionInterface *desc)
                    // the packaging mode needs to be 1
                    audio_codec, video_codec == "AV1" ? "AV1X" : video_codec, 1, "42e01f", 0);
     // Constrain video bitrate
-    SDPModif::bitrateMaxMinSDP(sdpCopy, video_bitrate, video_payloads);
+    SDPModif::bitrateMaxMinSDP(sdpCopy, video_bitrate, video_payloads, video_bitrate_min);
     // Enable stereo & constrain audio bitrate
     // NOTE ALEX: check that it does not incorrectly detect multiopus as opus
     SDPModif::stereoSDP(sdpCopy, audio_bitrate);

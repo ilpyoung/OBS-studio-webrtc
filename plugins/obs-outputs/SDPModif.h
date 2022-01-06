@@ -90,9 +90,11 @@ public:
     // Set video bitrate constraint (b=AS, x-google-min, x-google-max)
     static void bitrateMaxMinSDP(std::string &sdp,
                                  const int newBitrate,
-                                 const std::vector<int> &video_payload_numbers)
+                                 const std::vector<int> &video_payload_numbers,
+				 std::string &minBitrate)
     {
         std::string kbps = std::to_string(newBitrate);
+	std::string min_kbps = minBitrate;
         std::vector<std::string> sdpLines;
         split(sdp, (char *)"\r\n", sdpLines);
         int aLine = findLines(sdpLines, "m=audio ");
@@ -119,7 +121,7 @@ public:
             sdpLines.erase(sdpLines.begin() + testLine);
         }
 
-        testLine = findLines(sdpLines, "x-google-min-bitrate=500"); //+ kbps);
+        testLine = findLines(sdpLines, "x-google-min-bitrate="+ min_kbps);
 
         // video section already has an fmtp line with x-google-min-bitrate constraint
         // replace |testLine| with new x-google-min/max-constraint
@@ -131,7 +133,7 @@ public:
             if (std::regex_search(sdpLines[testLine], match, re)) {
                 std::string pre = match[1].str();
                 std::string post = match[2].str();
-                newLine << pre << "x-google-min-bitrate=500";// << kbps;
+                newLine << pre << "x-google-min-bitrate="<< min_kbps;
                 newLine << ";x-google-max-bitrate=" << kbps << post;
                 sdpLines.insert(sdpLines.begin() + testLine+1, newLine.str());
                 sdpLines.erase(sdpLines.begin() + testLine);
@@ -158,7 +160,7 @@ public:
                     if (std::regex_search(sdpLines[testLine], match, re)) {
                         std::string pre = match[1].str();
                         std::string post = match[2].str();
-                        newLine << pre << "x-google-min-bitrate=500";// << kbps;
+                        newLine << pre << "x-google-min-bitrate=" << min_kbps;
                         newLine << ";x-google-max-bitrate=" << kbps << post;
                         sdpLines.insert(sdpLines.begin() + testLine+1, newLine.str());
                         sdpLines.erase(sdpLines.begin() + testLine);
@@ -168,7 +170,7 @@ public:
                 // append x-google-*-bitrate constraints to fmtp line
                 else {
                     sdpLines[fmtp] =
-                        sdpLines[fmtp].append(";x-google-min-bitrate=500")// + kbps)
+                        sdpLines[fmtp].append(";x-google-min-bitrate=" + min_kbps)
                                       .append(";x-google-max-bitrate=" + kbps);
                 }
             }
@@ -177,7 +179,7 @@ public:
                 std::string fmtpLine = "a=fmtp:" + std::to_string(num);
                 sdpLines.insert(sdpLines.begin() + rtpmap + 1, fmtpLine);
                 sdpLines[rtpmap+1] =
-                    sdpLines[rtpmap+1].append(" x-google-min-bitrate=500")// + kbps)
+                    sdpLines[rtpmap+1].append(" x-google-min-bitrate=" + min_kbps)
                                       .append(";x-google-max-bitrate=" + kbps);
             }
         }
