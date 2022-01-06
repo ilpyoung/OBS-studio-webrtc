@@ -85,6 +85,9 @@ struct obs_service_info {
 	bool (*get_simulcast)(void *data);
 	const char *(*get_publishApiUrl)(void *data);
 
+	const char *(*get_user_id)(void *data);
+	const char *(*get_user_pw)(void *data);
+
 	const char *(*get_output_type)(void *data);
 
 	void (*get_supported_resolutions)(

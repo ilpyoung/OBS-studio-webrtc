@@ -442,12 +442,15 @@ OBSBasicSettings::OBSBasicSettings(QWidget *parent)
 	HookWidget(ui->streamingAdvancedSettingsButton, CHECK_CHANGED, ADV_STREAMING_SETTINGS_CHANGED);
 	HookWidget(ui->simulcastEnable,      CHECK_CHANGED,  STREAM1_CHANGED);
 	HookWidget(ui->publishApiUrl,        EDIT_CHANGED,   STREAM1_CHANGED);
+	HookWidget(ui->userId,        EDIT_CHANGED,   STREAM1_CHANGED);
+	HookWidget(ui->userPw,        EDIT_CHANGED,   STREAM1_CHANGED);
 	HookWidget(ui->outputMode,           COMBO_CHANGED,  OUTPUTS_CHANGED);
 	HookWidget(ui->simpleOutputPath,     EDIT_CHANGED,   OUTPUTS_CHANGED);
 	HookWidget(ui->simpleNoSpace,        CHECK_CHANGED,  OUTPUTS_CHANGED);
 	HookWidget(ui->simpleOutRecFormat,   COMBO_CHANGED,  OUTPUTS_CHANGED);
 	// NOTE LUDO: #194 replace Settings/Output video bitrate QSpinBox by QLineEdit
 	HookWidget(ui->simpleOutputVBitrate, EDIT_CHANGED,   OUTPUTS_CHANGED);
+	HookWidget(ui->simpleOutputVBitrateMin, EDIT_CHANGED,   OUTPUTS_CHANGED);
 	HookWidget(ui->simpleOutStrEncoder,  COMBO_CHANGED,  OUTPUTS_CHANGED);
 	HookWidget(ui->simpleOutputABitrate, COMBO_CHANGED,  OUTPUTS_CHANGED);
 	HookWidget(ui->simpleOutAdvanced,    CHECK_CHANGED,  OUTPUTS_CHANGED);
@@ -1841,6 +1844,8 @@ void OBSBasicSettings::LoadSimpleOutputSettings()
 		config_get_string(main->Config(), "SimpleOutput", "RecFormat");
 	int videoBitrate =
 		config_get_uint(main->Config(), "SimpleOutput", "VBitrate");
+	int videoBitrateMin =
+	config_get_uint(main->Config(), "SimpleOutput", "VBitrateMin");
 	const char *streamEnc = config_get_string(
 		main->Config(), "SimpleOutput", "StreamEncoder");
 	int audioBitrate =
@@ -1883,6 +1888,8 @@ void OBSBasicSettings::LoadSimpleOutputSettings()
 	ui->simpleOutputVBitrate->setText(
 		QString::fromStdString(std::to_string(videoBitrate)));
 
+	ui->simpleOutputVBitrateMin->setText(
+		QString::fromStdString(std::to_string(videoBitrateMin)));
 	int idx = ui->simpleOutRecFormat->findText(format);
 	ui->simpleOutRecFormat->setCurrentIndex(idx);
 
@@ -3545,6 +3552,7 @@ void OBSBasicSettings::SaveOutputSettings()
 	// NOTE LUDO: #194 replace Settings/Output video bitrate QSpinBox by QLineEdit
 	// SaveSpinBox(ui->simpleOutputVBitrate, "SimpleOutput", "VBitrate");
 	SaveEdit(ui->simpleOutputVBitrate, "SimpleOutput", "VBitrate");
+	SaveEdit(ui->simpleOutputVBitrateMin, "SimpleOutput", "VBitrateMin");
 	SaveComboData(ui->simpleOutStrEncoder, "SimpleOutput", "StreamEncoder");
 	SaveCombo(ui->simpleOutputABitrate, "SimpleOutput", "ABitrate");
 	SaveEdit(ui->simpleOutputPath, "SimpleOutput", "FilePath");

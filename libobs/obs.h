@@ -2357,6 +2357,10 @@ EXPORT const char *obs_service_get_room(const obs_service_t *service);
 /** Returns the username (if any) for this service context */
 EXPORT const char *obs_service_get_username(const obs_service_t *service);
 
+// 불러올 함수
+EXPORT const char *obs_service_get_userId(const obs_service_t *service);
+EXPORT const char *obs_service_get_userPw(const obs_service_t *service);
+
 /** Returns the password (if any) for this service context */
 EXPORT const char *obs_service_get_password(const obs_service_t *service);
 

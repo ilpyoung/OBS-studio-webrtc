@@ -172,6 +172,14 @@ void OBSBasicSettings::LoadStream1Settings()
 		ui->authUsername->setText(QT_UTF8(username));
 		ui->useAuth->setChecked(use_auth);
 
+		const char *userId =
+			obs_data_get_string(settings, "userId");
+		ui->userId->setText(QT_UTF8(userId));
+
+		const char *userPw =
+			obs_data_get_string(settings, "userPw");
+		ui->userPw->setText(QT_UTF8(userPw));
+
 		// NOTE LUDO: #172 codecs list of radio buttons
 		tmpString = obs_data_get_string(settings, "codec");
 		const char *codec = strcmp("", tmpString) == 0 ? "vp9"
@@ -206,6 +214,10 @@ void OBSBasicSettings::LoadStream1Settings()
 			obs_data_get_string(settings, "publish_api_url");
 		ui->publishApiUrl->setText(publish_api_url);
 
+		const char *user_id =
+			obs_data_get_string(settings, "user_id");
+		ui->publishApiUrl->setText(user_id);
+
 	} else if (strcmp(type, "rtmp_common") == 0) {
 		// #289 service list of radio buttons
 		QList<QAbstractButton *> listButtons =
@@ -236,6 +248,14 @@ void OBSBasicSettings::LoadStream1Settings()
 		const char *username =
 			obs_data_get_string(settings, "username");
 		ui->authUsername->setText(QT_UTF8(username));
+
+		const char *userId =
+			obs_data_get_string(settings, "userId");
+		ui->userId->setText(QT_UTF8(userId));
+
+		const char *userPw =
+			obs_data_get_string(settings, "userPw");
+		ui->userPw->setText(QT_UTF8(userPw));
 
 		const char *password =
 			obs_data_get_string(settings, "password");
@@ -363,6 +383,10 @@ void OBSBasicSettings::SaveStream1Settings()
 				  ui->useAuth->isChecked());
 		obs_data_set_string(settings, "username",
 				    QT_TO_UTF8(ui->authUsername->text()));
+		obs_data_set_string(settings, "userId",
+				    QT_TO_UTF8(ui->userId->text()));	
+		obs_data_set_string(settings, "userPw",
+					QT_TO_UTF8(ui->userPw->text()));			
 		obs_data_set_string(settings, "room",
 				    QT_TO_UTF8(ui->room->text()));
 		obs_data_set_string(
@@ -381,6 +405,10 @@ void OBSBasicSettings::SaveStream1Settings()
 				  ui->useAuth->isChecked());
 		obs_data_set_string(settings, "username",
 				    QT_TO_UTF8(ui->authUsername->text()));
+		obs_data_set_string(settings, "userId",
+				    QT_TO_UTF8(ui->userId->text()));
+		obs_data_set_string(settings, "userPw",
+					QT_TO_UTF8(ui->userPw->text()));	
 		obs_data_set_string(
 			settings, "protocol",
 			QT_TO_UTF8(ui->streamProtocol->currentText()));

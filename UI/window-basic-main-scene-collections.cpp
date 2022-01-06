@@ -172,7 +172,7 @@ bool OBSBasic::AddSceneCollection(bool create_new, const QString &qname)
 
 	blog(LOG_INFO, "Added scene collection '%s' (%s, %s.json)",
 	     name.c_str(), create_new ? "clean" : "duplicate", file.c_str());
-	blog(LOG_INFO, "------------------------------------------------");
+	blog(LOG_INFO, "------------------------------------------------6");
 
 	UpdateTitleBar();
 
@@ -285,10 +285,10 @@ void OBSBasic::on_actionRenameSceneCollection_triggered()
 	oldFile += ".bak";
 	os_unlink(oldFile.c_str());
 
-	blog(LOG_INFO, "------------------------------------------------");
+	blog(LOG_INFO, "------------------------------------------------7");
 	blog(LOG_INFO, "Renamed scene collection to '%s' (%s.json)",
 	     name.c_str(), file.c_str());
-	blog(LOG_INFO, "------------------------------------------------");
+	blog(LOG_INFO, "------------------------------------------------8");
 
 	UpdateTitleBar();
 	RefreshSceneCollections();
@@ -359,7 +359,7 @@ void OBSBasic::on_actionRemoveSceneCollection_triggered()
 	     "Removed scene collection '%s' (%s.json), "
 	     "switched to '%s' (%s.json)",
 	     oldName.c_str(), oldFile.c_str(), newName.c_str(), newFile);
-	blog(LOG_INFO, "------------------------------------------------");
+	blog(LOG_INFO, "------------------------------------------------9");
 
 	UpdateTitleBar();
 
@@ -444,7 +444,7 @@ void OBSBasic::ChangeSceneCollection()
 
 	blog(LOG_INFO, "Switched to scene collection '%s' (%s.json)", newName,
 	     newFile);
-	blog(LOG_INFO, "------------------------------------------------");
+	blog(LOG_INFO, "------------------------------------------------10");
 
 	UpdateTitleBar();
 

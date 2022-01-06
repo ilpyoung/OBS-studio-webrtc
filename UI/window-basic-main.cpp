@@ -71,6 +71,7 @@
 #include "undo-stack-obs.hpp"
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 #ifdef _WIN32
 #include "win-update/win-update.hpp"
@@ -7296,6 +7297,7 @@ void OBSBasic::OnVirtualCamStop(int)
 
 void OBSBasic::on_streamButton_clicked()
 {
+	cout << "Start Button Click! "  << endl;
 	if (outputHandler->StreamingActive()) {
 		bool confirm = config_get_bool(GetGlobalConfig(), "BasicWindow",
 					       "WarnBeforeStoppingStream");
