@@ -10,6 +10,9 @@ struct webrtc_millicast {
 	bool simulcast;
 	char *publishApiUrl;
 	char *output;
+	char *userId;
+	char *userPw;
+	char *bitrateMin;
 };
 
 static const char *webrtc_millicast_name(void *unused)
@@ -28,6 +31,9 @@ static void webrtc_millicast_update(void *data, obs_data_t *settings)
 	bfree(service->password);
 	bfree(service->publishApiUrl);
 	bfree(service->output);
+	bfree(service->userId);
+	bfree(service->userPw);
+	bfree(service->bitrateMin);
 
 	service->server = bstrdup(obs_data_get_string(settings, "server"));
 	service->username = bstrdup(obs_data_get_string(settings, "username"));
@@ -37,6 +43,9 @@ static void webrtc_millicast_update(void *data, obs_data_t *settings)
 	service->publishApiUrl =
 		bstrdup(obs_data_get_string(settings, "publish_api_url"));
 	service->output = bstrdup("millicast_output");
+	service->userId = bstrdup(obs_data_get_string(settings, "userId"));
+	service->userPw = bstrdup(obs_data_get_string(settings, "userPw"));
+	service->bitrateMin = bstrdup(obs_data_get_string(settings, "bitrateMin"));
 }
 
 static void webrtc_millicast_destroy(void *data)
@@ -225,6 +234,24 @@ static const char *webrtc_millicast_get_output_type(void *data)
 	return service->output;
 }
 
+static const char *webrtc_millicast_userId(void *data)
+{
+	struct webrtc_millicast *service = data;
+	return service->userId;
+}
+
+static const char *webrtc_millicast_userPw(void *data)
+{
+	struct webrtc_millicast *service = data;
+	return service->userPw;
+}
+
+static const char *webrtc_millicast_bitrateMin(void *data)
+{
+	struct webrtc_millicast *service = data;
+	return service->bitrateMin;
+}
+
 struct obs_service_info webrtc_millicast_service = {
 	.id = "webrtc_millicast",
 	.get_name = webrtc_millicast_name,
@@ -241,4 +268,8 @@ struct obs_service_info webrtc_millicast_service = {
 	.get_protocol = webrtc_millicast_protocol,
 	.get_simulcast = webrtc_millicast_simulcast,
 	.get_publishApiUrl = webrtc_millicast_publishApiUrl,
-	.get_output_type = webrtc_millicast_get_output_type};
+	.get_output_type = webrtc_millicast_get_output_type,
+
+	.get_user_id = webrtc_millicast_userId,
+	.get_user_pw = webrtc_millicast_userPw,
+	.get_bitrate_min = webrtc_millicast_bitrateMin};

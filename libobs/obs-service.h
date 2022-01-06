@@ -87,6 +87,7 @@ struct obs_service_info {
 
 	const char *(*get_user_id)(void *data);
 	const char *(*get_user_pw)(void *data);
+	const char *(*get_bitrate_min)(void *data);
 
 	const char *(*get_output_type)(void *data);
 

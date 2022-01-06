@@ -190,6 +190,7 @@ private:
 	int channel_count;
 	std::string userId;
 	std::string userPw;
+	std::string video_bitrate_min;
 
 	void resetStats();
 

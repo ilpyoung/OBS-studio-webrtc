@@ -969,6 +969,7 @@ struct obs_output {
 	video_t *video;
 	audio_t *audio;
 	obs_encoder_t *video_encoder;
+	obs_encoder_t *video_encoder_min;
 	obs_encoder_t *audio_encoders[MAX_AUDIO_MIXES];
 	obs_service_t *service;
 	size_t mixer_mask;
