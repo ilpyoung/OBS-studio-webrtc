@@ -186,6 +186,8 @@ private:
 	bool simulcast;
 	std::string publishApiUrl;
 	int channel_count;
+	std::string userId;
+	std::string userPw;
 
 	void resetStats();
 
