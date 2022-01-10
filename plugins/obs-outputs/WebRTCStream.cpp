@@ -14,7 +14,7 @@
 #include "common_video/libyuv/include/webrtc_libyuv.h"
 #include "pc/rtc_stats_collector.h"
 #include "rtc_base/checks.h"
-#include <third_party\libyuv\include\libyuv.h>
+#include "libyuv.h"
 
 #include <algorithm>
 #include <chrono>
@@ -473,6 +473,7 @@ void WebRTCStream::OnSuccess(webrtc::SessionDescriptionInterface *desc)
         video_codec = "h264"; // h264 must be in lowercase (Firefox)
 #endif
     }
+
     // Force specific video/audio payload
     SDPModif::forcePayload(sdpCopy, audio_payloads, video_payloads,
                    // the packaging mode needs to be 1

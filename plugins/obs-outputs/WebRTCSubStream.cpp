@@ -14,7 +14,7 @@
 #include "common_video/libyuv/include/webrtc_libyuv.h"
 #include "pc/rtc_stats_collector.h"
 #include "rtc_base/checks.h"
-#include <third_party\libyuv\include\libyuv.h>
+#include "libyuv.h"
 
 #include <algorithm>
 #include <chrono>
@@ -60,13 +60,13 @@ public:
     }
 };
 
-CustomLogger1 logger;
+CustomLogger1 logger_;
 
 WebRTCSubStream::WebRTCSubStream(obs_output_t *output,
 				 const std::string &v_codec)
 {
-    rtc::LogMessage::RemoveLogToStream(&logger);
-    rtc::LogMessage::AddLogToStream(&logger,
+    rtc::LogMessage::RemoveLogToStream(&logger_);
+    rtc::LogMessage::AddLogToStream(&logger_,
                     rtc::LoggingSeverity::LS_VERBOSE);
     video_codec = v_codec;
     resetStats();
@@ -110,7 +110,7 @@ WebRTCSubStream::WebRTCSubStream(obs_output_t *output,
 
 WebRTCSubStream::~WebRTCSubStream()
 {
-    rtc::LogMessage::RemoveLogToStream(&logger);
+    rtc::LogMessage::RemoveLogToStream(&logger_);
 
     // Shutdown websocket connection and close Peer Connection
     close(false);
@@ -337,7 +337,7 @@ bool WebRTCSubStream::start()
 
     stream = factory->CreateLocalMediaStream("obs");
 
-     audio_source = obsWebrtcAudioSource::Create(&options);
+    audio_source = obsWebrtcAudioSource::Create(&options);
      audio_track = factory->CreateAudioTrack("audio", audio_source);
      pc->AddTrack(audio_track, {"obs"});
      stream->AddTrack(audio_track);
@@ -453,6 +453,7 @@ void WebRTCSubStream::OnSuccess(webrtc::SessionDescriptionInterface *desc)
 #endif
     }
     // Force specific video/audio payload
+    //info("!!minbitrate:%s",video_bitrate_min);
     SDPModif::forcePayload(sdpCopy, audio_payloads, video_payloads,
                    // the packaging mode needs to be 1
                    audio_codec, video_codec == "AV1" ? "AV1X" : video_codec, 1, "42e01f", 0);

@@ -7,6 +7,8 @@
 #include <util/dstr.h>
 #include <util/threading.h>
 #include <inttypes.h>
+#include <thread>
+#include <chrono>
 #include <modules/audio_processing/include/audio_processing.h>
 
 #define warn(format, ...) blog(LOG_WARNING, format, ##__VA_ARGS__)
@@ -46,12 +48,12 @@ extern "C" void millicast_stream_destroy(void *data)
 	if(multi_codec){
 		if (mt1_stream != nullptr) {
 			mt1_stream->stop();
-			mt1_stream->Release();
+			//mt1_stream->Release();
 			mt1_stream = nullptr;
 		}
 		if (mt2_stream != nullptr) {
 			mt2_stream->stop();
-			mt2_stream->Release();
+			//mt2_stream->Release();
 			mt2_stream = nullptr;
 		}
 		multi_codec = false;
@@ -85,12 +87,12 @@ extern "C" void millicast_stream_stop(void *data, uint64_t ts)
 	if(multi_codec){
 		if (mt1_stream != nullptr) {
 			mt1_stream->stop();
-			mt1_stream->Release();
+			//mt1_stream->Release();
 			mt1_stream = nullptr;
 		}
 		if (mt2_stream != nullptr) {
 			mt2_stream->stop();
-			mt2_stream->Release();
+			//mt2_stream->Release();
 			mt2_stream = nullptr;
 		}
 		multi_codec = false;
@@ -109,19 +111,18 @@ extern "C" bool millicast_stream_start(void *data)
 	std::string video_codec = obs_service_get_codec(service)
 					  ? obs_service_get_codec(service)
 					  : "";
-	info("%s video codec is!", video_codec);
+	//info("%s video codec is!", video_codec);
 	if (video_codec == "multi") { //codec가져오는 부분 손보기 및 중단 후 재실행하면 하나만 송출되는거 수정하기
 		multi_codec = true;
-		video_codec = "VP9";
 		mt1_stream = new WebRTCSubStream(output, "h264");
 		mt1_stream->AddRef();
+		mt1_stream->start();
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
 		mt2_stream = new WebRTCSubStream(output, "AV1");
 		mt2_stream->AddRef();
-
-		if (mt1_stream != nullptr)
-			mt1_stream->start();
-		if (mt2_stream != nullptr)
-			mt2_stream->start();
+		mt2_stream->start();
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
 
 	return stream->start(WebRTCStream::Type::Millicast);
