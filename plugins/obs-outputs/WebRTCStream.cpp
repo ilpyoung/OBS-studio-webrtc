@@ -14,7 +14,12 @@
 #include "common_video/libyuv/include/webrtc_libyuv.h"
 #include "pc/rtc_stats_collector.h"
 #include "rtc_base/checks.h"
-#include <third_party\libyuv\include\libyuv.h>
+
+#ifdef _WIN32
+    #include <third_party\libyuv\include\libyuv.h>
+#elif __APPLE__
+    #include <libyuv.h>
+#endif
 
 #include <algorithm>
 #include <chrono>

@@ -14,7 +14,12 @@
 #include "common_video/libyuv/include/webrtc_libyuv.h"
 #include "pc/rtc_stats_collector.h"
 #include "rtc_base/checks.h"
-#include <third_party\libyuv\include\libyuv.h>
+
+#ifdef _WIN32
+    #include <third_party\libyuv\include\libyuv.h>
+#elif __APPLE__
+    #include <libyuv.h>
+#endif
 
 #include <algorithm>
 #include <chrono>
@@ -60,13 +65,13 @@ public:
     }
 };
 
-CustomLogger1 logger;
+CustomLogger1 logger1;
 
 WebRTCSubStream::WebRTCSubStream(obs_output_t *output,
 				 const std::string &v_codec)
 {
-    rtc::LogMessage::RemoveLogToStream(&logger);
-    rtc::LogMessage::AddLogToStream(&logger,
+    rtc::LogMessage::RemoveLogToStream(&logger1);
+    rtc::LogMessage::AddLogToStream(&logger1,
                     rtc::LoggingSeverity::LS_VERBOSE);
     video_codec = v_codec;
     resetStats();
@@ -110,7 +115,7 @@ WebRTCSubStream::WebRTCSubStream(obs_output_t *output,
 
 WebRTCSubStream::~WebRTCSubStream()
 {
-    rtc::LogMessage::RemoveLogToStream(&logger);
+    rtc::LogMessage::RemoveLogToStream(&logger1);
 
     // Shutdown websocket connection and close Peer Connection
     close(false);

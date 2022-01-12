@@ -109,7 +109,7 @@ extern "C" bool millicast_stream_start(void *data)
 	std::string video_codec = obs_service_get_codec(service)
 					  ? obs_service_get_codec(service)
 					  : "";
-	info("%s video codec is!", video_codec);
+	// info("%s video codec is!", video_codec);
 	if (video_codec == "multi") { //codec가져오는 부분 손보기 및 중단 후 재실행하면 하나만 송출되는거 수정하기
 		multi_codec = true;
 		video_codec = "VP9";
