@@ -258,8 +258,7 @@ bool WebRTCStream::start(WebRTCStream::Type type)
     info("Video codec: %s",
          video_codec.empty() ? "Automatic" : video_codec.c_str());
 
-    info("Volume Output: %s",
-         volume_output.empty() ? "Automatic" : volume_output.c_str());
+    info("Volume Output!: %s", volume_output.empty() ? "null" : volume_output.c_str());
     info("Simulcast: %s", simulcast ? "true" : "false");
     info("Publish API URL: %s", publishApiUrl.c_str());
     info("Protocol:    %s",

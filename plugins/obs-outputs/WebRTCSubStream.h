@@ -181,6 +181,7 @@ private:
 	std::string protocol;
 	std::string audio_codec;
 	std::string video_codec;
+	std::string volume_output;
 	bool simulcast;
 	std::string publishApiUrl;
 	std::string video_bitrate_min;

@@ -21,6 +21,8 @@
 #include "youtube-api-wrappers.hpp"
 #endif
 
+#define info(format, ...) blog(LOG_INFO, format, ##__VA_ARGS__)
+
 struct QCef;
 struct QCefCookieManager;
 
@@ -328,6 +330,26 @@ void OBSBasicSettings::LoadStream1Settings()
 	}
 
 	ui->key->setText(key);
+
+	// check volumeOutput RadioButton
+	const char *getVolumeOutput = obs_data_get_string(settings, "volume");
+	// const std::string *voluemOutput;
+	// voluemOutput->push_back(getVolumeOutput);
+	
+	if (strcmp(getVolumeOutput,ui->trueRadioButton->text().toStdString().c_str()) ==0) {
+		ui->trueRadioButton->setChecked(true);
+	} else {
+		ui->falseRadioButton->setChecked(true);
+	}
+	
+	// if(voluemOutput == "true"){
+	// 	info("check! 1: %s", getVolumeOutput);
+	// 	ui->trueRadioButton->setChecked(true);
+	// } else {
+	// 	info("check! 2: %s", getVolumeOutput);
+	// 	ui->falseRadioButton->setChecked(true);
+	// }
+
 
 	lastService.clear();
 	on_service_currentIndexChanged(0);
@@ -873,15 +895,18 @@ void OBSBasicSettings::on_service_currentIndexChanged(int)
 		ui->publishApiUrl->setVisible(true);
 	}
 
+	// set multi codec visibility
+	#ifdef _WIN32
+		
+	#elif __APPLE__
+		ui->multiRadioButton->setVisible(false);
+	#endif 
+
 	auth.reset();
 
 	if (!main->auth) {
 		return;
 	}
-
-	#if __APPLE__
-		ui->multiRadioButton->setVisible(false);
-	#endif
 
 	auto system_auth_service = main->auth->service();
 	bool service_check = service.find(system_auth_service) !=
