@@ -7,6 +7,7 @@ struct webrtc_millicast {
 	char *username;
 	char *password;
 	char *codec;
+	char *volume;
 	bool simulcast;
 	char *publishApiUrl;
 	char *output;
@@ -28,6 +29,7 @@ static void webrtc_millicast_update(void *data, obs_data_t *settings)
 	bfree(service->server);
 	bfree(service->username);
 	bfree(service->codec);
+	bfree(service->volume);
 	bfree(service->password);
 	bfree(service->publishApiUrl);
 	bfree(service->output);
@@ -39,6 +41,7 @@ static void webrtc_millicast_update(void *data, obs_data_t *settings)
 	service->username = bstrdup(obs_data_get_string(settings, "username"));
 	service->password = bstrdup(obs_data_get_string(settings, "password"));
 	service->codec = bstrdup(obs_data_get_string(settings, "codec"));
+	service->volume = bstrdup(obs_data_get_string(settings, "volume"));
 	service->simulcast = obs_data_get_bool(settings, "simulcast");
 	service->publishApiUrl =
 		bstrdup(obs_data_get_string(settings, "publish_api_url"));
@@ -55,6 +58,7 @@ static void webrtc_millicast_destroy(void *data)
 	bfree(service->server);
 	bfree(service->username);
 	bfree(service->codec);
+	bfree(service->volume);
 	bfree(service->password);
 	bfree(service->publishApiUrl);
 	bfree(service->output);
@@ -91,6 +95,9 @@ static bool use_auth_modified(obs_properties_t *ppts, obs_property_t *p,
 	obs_property_set_visible(p, true);
 
 	p = obs_properties_get(ppts, "codec");
+	obs_property_set_visible(p, true);
+
+	p = obs_properties_get(ppts, "volume");
 	obs_property_set_visible(p, true);
 
 	p = obs_properties_get(ppts, "protocol");
@@ -142,6 +149,12 @@ static obs_properties_t *webrtc_millicast_properties(void *unused)
 	obs_property_list_add_string(obs_properties_get(ppts, "codec"), "vp9",
 				     "vp9");
 
+	obs_property_list_add_string(obs_properties_get(ppts, "volume"), "true",
+				     "true");
+
+	obs_property_list_add_string(obs_properties_get(ppts, "volume"), "false",
+				     "false");
+
 	p = obs_properties_get(ppts, "room");
 	obs_property_set_visible(p, false);
 
@@ -152,6 +165,9 @@ static obs_properties_t *webrtc_millicast_properties(void *unused)
 	obs_property_set_visible(p, true);
 
 	p = obs_properties_get(ppts, "codec");
+	obs_property_set_visible(p, true);
+
+	p = obs_properties_get(ppts, "volume");
 	obs_property_set_visible(p, true);
 
 	p = obs_properties_get(ppts, "protocol");
@@ -204,6 +220,14 @@ static const char *webrtc_millicast_codec(void *data)
 	if (strcmp(service->codec, "Automatic") == 0)
 		return "";
 	return service->codec;
+}
+
+static const char *webrtc_millicast_volume(void *data)
+{
+	struct webrtc_millicast *service = data;
+	if (strcmp(service->volume, "Automatic") == 0)
+		return "";
+	return service->volume;
 }
 
 static bool webrtc_millicast_simulcast(void *data)
@@ -265,6 +289,7 @@ struct obs_service_info webrtc_millicast_service = {
 	.get_username = webrtc_millicast_username,
 	.get_password = webrtc_millicast_password,
 	.get_codec = webrtc_millicast_codec,
+	.get_volume = webrtc_millicast_volume,
 	.get_protocol = webrtc_millicast_protocol,
 	.get_simulcast = webrtc_millicast_simulcast,
 	.get_publishApiUrl = webrtc_millicast_publishApiUrl,

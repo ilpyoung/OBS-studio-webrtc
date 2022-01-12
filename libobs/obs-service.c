@@ -227,6 +227,16 @@ const char *obs_service_get_codec(const obs_service_t *service)
 	return service->info.get_codec(service->context.data);
 }
 
+const char *obs_service_get_volume(const obs_service_t *service)
+{
+	if (!obs_service_valid(service, "obs_service_get_voulme"))
+		return NULL;
+
+	if (!service->info.get_volume)
+		return NULL;
+	return service->info.get_volume(service->context.data);
+}
+
 bool obs_service_get_simulcast(const obs_service_t *service)
 {
 	if (!obs_service_valid(service, "obs_service_get_simulcast"))

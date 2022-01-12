@@ -428,6 +428,10 @@ void OBSBasicSettings::SaveStream1Settings()
 		// QT_TO_UTF8(ui->codec->currentText()));
 		QT_TO_UTF8(ui->codecButtonGroup->checkedButton()->text()));
 
+	obs_data_set_string(
+		settings, "volume",
+		QT_TO_UTF8(ui->volumeButtonGroup->checkedButton()->text()));
+
 	if (!!auth && strcmp(auth->service(), "Twitch") == 0) {
 		bool choiceExists = config_has_user_value(
 			main->Config(), "Twitch", "AddonChoice");
@@ -754,6 +758,7 @@ void OBSBasicSettings::on_service_currentIndexChanged(int)
 		obs_property_t *password =
 			obs_properties_get(props, "password");
 		obs_property_t *codec = obs_properties_get(props, "codec");
+		obs_property_t *volume = obs_properties_get(props, "volume");
 		obs_property_t *streamingAdvancedSettings = obs_properties_get(
 			props, "streaming_advanced_settings");
 		obs_property_t *simulcast =
@@ -874,6 +879,10 @@ void OBSBasicSettings::on_service_currentIndexChanged(int)
 		return;
 	}
 
+	#if __APPLE__
+		ui->multiRadioButton->setVisible(false);
+	#endif
+
 	auto system_auth_service = main->auth->service();
 	bool service_check = service.find(system_auth_service) !=
 			     std::string::npos;
@@ -935,13 +944,13 @@ void OBSBasicSettings::on_authPwShow_clicked()
 
 void OBSBasicSettings::on_userPwShow_clicked()
 {
-	/*if (ui->userPw->echoMode() == QLineEdit::Password) {
+	if (ui->userPw->echoMode() == QLineEdit::Password) {
 		ui->userPw->setEchoMode(QLineEdit::Normal);
-		ui->userPwShow->setText(QTStr("숨기기"));
+		ui->userPwShow->setText(QTStr("Hide"));
 	} else {
 		ui->userPw->setEchoMode(QLineEdit::Password);
-		ui->userPwShow->setText(QTStr("보이기"));
-	}*/
+		ui->userPwShow->setText(QTStr("Show"));
+	}
 }
 
 OBSService OBSBasicSettings::SpawnTempService()
