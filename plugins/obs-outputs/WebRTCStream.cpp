@@ -14,10 +14,11 @@
 #include "common_video/libyuv/include/webrtc_libyuv.h"
 #include "pc/rtc_stats_collector.h"
 #include "rtc_base/checks.h"
-#ifdef __APPLE__
-#include <third_party\libyuv\include\libyuv.h>
-#else
-#include "libyuv.h"
+
+#ifdef _WIN32
+    #include <third_party\libyuv\include\libyuv.h>
+#elif __APPLE__
+    #include <libyuv.h>
 #endif
 
 #include <algorithm>
@@ -204,6 +205,7 @@ bool WebRTCStream::start(WebRTCStream::Type type)
                   : "";
     if (video_codec == "multi") // == "multi" ==> VP9
 	    video_codec = "VP9";
+
     // #271 do not list video codec H264 if it is not available in libwebrtc
 #ifdef DISABLE_WEBRTC_H264
     if ("h264" == video_codec) {
@@ -211,6 +213,11 @@ bool WebRTCStream::start(WebRTCStream::Type type)
         video_codec = "VP9";
     }
 #endif
+
+    volume_output = obs_service_get_volume(service)
+                  ? obs_service_get_volume(service)
+                  : "";
+
     protocol = obs_service_get_protocol(service)
                ? obs_service_get_protocol(service)
                : "";
@@ -250,6 +257,8 @@ bool WebRTCStream::start(WebRTCStream::Type type)
 
     info("Video codec: %s",
          video_codec.empty() ? "Automatic" : video_codec.c_str());
+
+    info("Volume Output!: %s", volume_output.empty() ? "null" : volume_output.c_str());
     info("Simulcast: %s", simulcast ? "true" : "false");
     info("Publish API URL: %s", publishApiUrl.c_str());
     info("Protocol:    %s",

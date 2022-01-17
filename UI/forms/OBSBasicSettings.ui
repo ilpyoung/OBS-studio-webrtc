@@ -1356,7 +1356,7 @@
                  <item>
                   <widget class="QRadioButton" name="h264RadioButton">
                    <property name="text">
-                    <string>H264</string>
+                    <string>h264</string>
                    </property>
                    <attribute name="buttonGroup">
                     <string notr="true">codecButtonGroup</string>
@@ -1410,7 +1410,7 @@
                </widget>
               </widget>
              </item>
-             <item row="5" column="0">
+             <item row="6" column="0">
               <widget class="QLabel" name="streamKeyLabel">
                <property name="text">
                 <string>Basic.AutoConfig.StreamPage.StreamKey</string>
@@ -1423,7 +1423,7 @@
                </property>
               </widget>
              </item>
-             <item row="5" column="1">
+             <item row="6" column="1">
               <widget class="QFrame" name="streamKeyWidget">
                <layout class="QHBoxLayout" name="horizontalLayout_11">
                 <property name="leftMargin">
@@ -1474,30 +1474,17 @@
                </layout>
               </widget>
              </item>
-             <item row="7" column="0">
-              <spacer name="horizontalSpacer_18">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>170</width>
-                 <height>8</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="7" column="1">
+             <item row="8" column="1">
               <layout class="QHBoxLayout" name="horizontalLayout_15"/>
              </item>
-             <item row="8" column="0">
+             <item row="9" column="0">
               <widget class="QLabel" name="connectedAccountLabel">
                <property name="text">
                 <string>Basic.AutoConfig.StreamPage.ConnectedAccount</string>
                </property>
               </widget>
              </item>
-             <item row="8" column="1">
+             <item row="9" column="1">
               <layout class="QHBoxLayout" name="horizontalLayout_23">
                <property name="spacing">
                 <number>8</number>
@@ -1540,7 +1527,7 @@
                </item>
               </layout>
              </item>
-             <item row="9" column="1">
+             <item row="10" column="1">
               <layout class="QHBoxLayout" name="horizontalLayout_28">
                <item>
                 <widget class="QPushButton" name="useStreamKeyAdv">
@@ -1567,7 +1554,7 @@
                </item>
               </layout>
              </item>
-             <item row="10" column="1">
+             <item row="11" column="1">
               <spacer name="horizontalSpacer_19">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
@@ -1580,7 +1567,7 @@
                </property>
               </spacer>
              </item>
-             <item row="11" column="1">
+             <item row="12" column="1">
               <widget class="QPushButton" name="connectAccount2">
                <property name="cursor">
                 <cursorShape>PointingHandCursor</cursorShape>
@@ -1590,14 +1577,14 @@
                </property>
               </widget>
              </item>
-             <item row="12" column="1">
+             <item row="13" column="1">
               <widget class="QCheckBox" name="bandwidthTestEnable">
                <property name="text">
                 <string>Basic.Settings.Stream.BandwidthTestMode</string>
                </property>
               </widget>
              </item>
-             <item row="13" column="0">
+             <item row="14" column="0">
               <widget class="QLabel" name="roomLabel">
                <property name="text">
                 <string>Room</string>
@@ -1607,14 +1594,14 @@
                </property>
               </widget>
              </item>
-             <item row="13" column="1">
+             <item row="14" column="1">
               <widget class="QCheckBox" name="useAuth">
                <property name="text">
                 <string>Basic.Settings.Stream.Custom.UseAuthentication</string>
                </property>
               </widget>
              </item>
-             <item row="14" column="0">
+             <item row="15" column="0">
               <widget class="QLabel" name="authUsernameLabel">
                <property name="text">
                 <string>Basic.Settings.Stream.Custom.Username</string>
@@ -1624,10 +1611,10 @@
                </property>
               </widget>
              </item>
-             <item row="14" column="1">
+             <item row="15" column="1">
               <widget class="QLineEdit" name="authUsername"/>
              </item>
-             <item row="18" column="0">
+             <item row="19" column="0">
               <widget class="QLabel" name="streamProtocolLabel">
                <property name="text">
                 <string>Protocol</string>
@@ -1637,7 +1624,7 @@
                </property>
               </widget>
              </item>
-             <item row="18" column="1">
+             <item row="19" column="1">
               <widget class="QComboBox" name="streamProtocol">
                <property name="currentIndex">
                 <number>0</number>
@@ -1659,14 +1646,14 @@
                </item>
               </widget>
              </item>
-             <item row="19" column="0">
+             <item row="20" column="0">
               <widget class="QLabel" name="serverLabel">
                <property name="text">
                 <string>Basic.AutoConfig.StreamPage.Server</string>
                </property>
               </widget>
              </item>
-             <item row="19" column="1">
+             <item row="20" column="1">
               <widget class="QStackedWidget" name="serverStackedWidget">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
@@ -1717,14 +1704,14 @@
                </widget>
               </widget>
              </item>
-             <item row="20" column="0">
+             <item row="21" column="0">
               <widget class="QPushButton" name="streamingAdvancedSettingsButton">
                <property name="text">
                 <string>Advanced Settings</string>
                </property>
               </widget>
              </item>
-             <item row="21" column="0">
+             <item row="22" column="0">
               <widget class="UrlPushButton" name="moreInfoButton">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
@@ -1737,14 +1724,14 @@
                </property>
               </widget>
              </item>
-             <item row="21" column="1">
+             <item row="22" column="1">
               <widget class="QCheckBox" name="simulcastEnable">
                <property name="text">
                 <string>Simulcast</string>
                </property>
               </widget>
              </item>
-             <item row="23" column="0">
+             <item row="24" column="0">
               <widget class="QRadioButton" name="millicastRtmpRadioButton">
                <property name="text">
                 <string>Millicast-RTMP</string>
@@ -1754,7 +1741,7 @@
                </attribute>
               </widget>
              </item>
-             <item row="24" column="0">
+             <item row="25" column="0">
               <widget class="QRadioButton" name="millicastWebrtcRadioButton">
                <property name="text">
                 <string>Millicast-WebRTC</string>
@@ -1762,6 +1749,95 @@
                <attribute name="buttonGroup">
                 <string notr="true">serviceButtonGroup</string>
                </attribute>
+              </widget>
+             </item>
+             <item row="8" column="0">
+              <spacer name="horizontalSpacer_18">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>170</width>
+                 <height>8</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="5" column="0">
+              <widget class="QLabel" name="volumeOutputLabel">
+               <property name="text">
+                <string>VolumeOutput</string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="1">
+              <widget class="QGroupBox" name="volumeGroupBox">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>115</width>
+                 <height>65</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">border-color: rgb(112, 112, 112);</string>
+               </property>
+               <property name="title">
+                <string/>
+               </property>
+               <widget class="QWidget" name="verticalLayoutWidget_2">
+                <property name="geometry">
+                 <rect>
+                  <x>10</x>
+                  <y>10</y>
+                  <width>101</width>
+                  <height>51</height>
+                 </rect>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_25">
+                 <property name="leftMargin">
+                  <number>1</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>1</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>1</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>1</number>
+                 </property>
+                 <item>
+                  <widget class="QRadioButton" name="trueRadioButton">
+                   <property name="text">
+                    <string>true</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">volumeButtonGroup</string>
+                   </attribute>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="falseRadioButton">
+                   <property name="text">
+                    <string>false</string>
+                   </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">volumeButtonGroup</string>
+                   </attribute>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
               </widget>
              </item>
             </layout>
@@ -6693,5 +6769,6 @@
   <buttongroup name="serviceButtonGroup"/>
   <buttongroup name="codecButtonGroup"/>
   <buttongroup name="basicSettingsButtonGroup"/>
+  <buttongroup name="volumeButtonGroup"/>
  </buttongroups>
 </ui>

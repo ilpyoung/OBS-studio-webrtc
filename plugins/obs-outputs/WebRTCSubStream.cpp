@@ -14,10 +14,10 @@
 #include "common_video/libyuv/include/webrtc_libyuv.h"
 #include "pc/rtc_stats_collector.h"
 #include "rtc_base/checks.h"
-#ifdef __APPLE__
-#include <third_party\libyuv\include\libyuv.h>
-#else
-#include "libyuv.h"
+#ifdef _WIN32
+    #include <third_party\libyuv\include\libyuv.h>
+#elif __APPLE__
+    #include <libyuv.h>
 #endif
 
 #include <algorithm>
@@ -114,7 +114,11 @@ WebRTCSubStream::WebRTCSubStream(obs_output_t *output,
 
 WebRTCSubStream::~WebRTCSubStream()
 {
+<<<<<<< HEAD
     rtc::LogMessage::RemoveLogToStream(&logger_);
+=======
+    rtc::LogMessage::RemoveLogToStream(&logger1);
+>>>>>>> origin/fix_juho2
 
     // Shutdown websocket connection and close Peer Connection
     close(false);
@@ -207,6 +211,10 @@ bool WebRTCSubStream::start()
         video_codec = "VP9";
     }
 #endif
+    volume_output = obs_service_get_volume(service)
+                  ? obs_service_get_volume(service)
+                  : "";
+
     protocol = obs_service_get_protocol(service)
                ? obs_service_get_protocol(service)
                : "";
@@ -232,6 +240,7 @@ bool WebRTCSubStream::start()
 
     info("Video codec: %s",
          video_codec.empty() ? "Automatic" : video_codec.c_str());
+    info("Volume Output!!: %s", volume_output.empty() ? "null" : volume_output.c_str());
     info("Simulcast: %s", simulcast ? "true" : "false");
     info("Publish API URL: %s", publishApiUrl.c_str());
     info("Protocol:    %s",

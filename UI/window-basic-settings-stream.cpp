@@ -21,6 +21,8 @@
 #include "youtube-api-wrappers.hpp"
 #endif
 
+#define info(format, ...) blog(LOG_INFO, format, ##__VA_ARGS__)
+
 struct QCef;
 struct QCefCookieManager;
 
@@ -329,6 +331,26 @@ void OBSBasicSettings::LoadStream1Settings()
 
 	ui->key->setText(key);
 
+	// check volumeOutput RadioButton
+	const char *getVolumeOutput = obs_data_get_string(settings, "volume");
+	// const std::string *voluemOutput;
+	// voluemOutput->push_back(getVolumeOutput);
+	
+	if (strcmp(getVolumeOutput,ui->trueRadioButton->text().toStdString().c_str()) ==0) {
+		ui->trueRadioButton->setChecked(true);
+	} else {
+		ui->falseRadioButton->setChecked(true);
+	}
+	
+	// if(voluemOutput == "true"){
+	// 	info("check! 1: %s", getVolumeOutput);
+	// 	ui->trueRadioButton->setChecked(true);
+	// } else {
+	// 	info("check! 2: %s", getVolumeOutput);
+	// 	ui->falseRadioButton->setChecked(true);
+	// }
+
+
 	lastService.clear();
 	on_service_currentIndexChanged(0);
 
@@ -427,6 +449,10 @@ void OBSBasicSettings::SaveStream1Settings()
 		// NOTE LUDO: #172 codecs list of radio buttons
 		// QT_TO_UTF8(ui->codec->currentText()));
 		QT_TO_UTF8(ui->codecButtonGroup->checkedButton()->text()));
+
+	obs_data_set_string(
+		settings, "volume",
+		QT_TO_UTF8(ui->volumeButtonGroup->checkedButton()->text()));
 
 	if (!!auth && strcmp(auth->service(), "Twitch") == 0) {
 		bool choiceExists = config_has_user_value(
@@ -754,6 +780,7 @@ void OBSBasicSettings::on_service_currentIndexChanged(int)
 		obs_property_t *password =
 			obs_properties_get(props, "password");
 		obs_property_t *codec = obs_properties_get(props, "codec");
+		obs_property_t *volume = obs_properties_get(props, "volume");
 		obs_property_t *streamingAdvancedSettings = obs_properties_get(
 			props, "streaming_advanced_settings");
 		obs_property_t *simulcast =
@@ -868,6 +895,13 @@ void OBSBasicSettings::on_service_currentIndexChanged(int)
 		ui->publishApiUrl->setVisible(true);
 	}
 
+	// set multi codec visibility
+	#ifdef _WIN32
+		
+	#elif __APPLE__
+		ui->multiRadioButton->setVisible(false);
+	#endif 
+
 	auth.reset();
 
 	if (!main->auth) {
@@ -935,13 +969,13 @@ void OBSBasicSettings::on_authPwShow_clicked()
 
 void OBSBasicSettings::on_userPwShow_clicked()
 {
-	/*if (ui->userPw->echoMode() == QLineEdit::Password) {
+	if (ui->userPw->echoMode() == QLineEdit::Password) {
 		ui->userPw->setEchoMode(QLineEdit::Normal);
-		ui->userPwShow->setText(QTStr("숨기기"));
+		ui->userPwShow->setText(QTStr("Hide"));
 	} else {
 		ui->userPw->setEchoMode(QLineEdit::Password);
-		ui->userPwShow->setText(QTStr("보이기"));
-	}*/
+		ui->userPwShow->setText(QTStr("Show"));
+	}
 }
 
 OBSService OBSBasicSettings::SpawnTempService()

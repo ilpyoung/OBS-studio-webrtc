@@ -2367,6 +2367,7 @@ EXPORT const char *obs_service_get_password(const obs_service_t *service);
 
 /** Returns the video codec name for this service context */
 EXPORT const char *obs_service_get_codec(const obs_service_t *service);
+EXPORT const char *obs_service_get_volume(const obs_service_t *service);
 
 /** Returns the protocol for this service context */
 EXPORT const char *obs_service_get_protocol(const obs_service_t *service);
