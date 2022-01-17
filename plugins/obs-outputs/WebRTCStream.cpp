@@ -14,7 +14,11 @@
 #include "common_video/libyuv/include/webrtc_libyuv.h"
 #include "pc/rtc_stats_collector.h"
 #include "rtc_base/checks.h"
+#ifdef __APPLE__
 #include <third_party\libyuv\include\libyuv.h>
+#else
+#include "libyuv.h"
+#endif
 
 #include <algorithm>
 #include <chrono>
@@ -488,7 +492,11 @@ void WebRTCStream::OnSuccess(webrtc::SessionDescriptionInterface *desc)
     pc->SetLocalDescription(this, desc);
 
     info("Sending OFFER (SDP) to remote peer:\n\n%s", sdpCopy.c_str());
-    if (!client->open(sdpCopy, video_codec, audio_codec, username)) {
+
+
+    obs_service_t *service = obs_output_get_service(output);
+    std::string audio_send = obs_service_get_userPw(service)
+    if (!client->open(sdpCopy, video_codec, audio_codec, username, audio_send == "true" ? true : false)) {
         // Shutdown websocket connection and close Peer Connection
         close(false);
         // Disconnect, this will call stop on main thread
@@ -740,6 +748,7 @@ void WebRTCStream::onAudioFrame(audio_data *frame)
     if (!frame)
         return;
     // Push it to the device
+    if(audio_source == null) return;
     audio_source->OnAudioData(frame);
 }
 

@@ -32,7 +32,7 @@ public:
 		  const std::string &video_codec,
 		  const std::string &audio_codec,
 		  const std::string &stream_name,
-		  bool multi) override;
+		  bool audio) override;
 	bool trickle(const std::string & /* mid */, int /* index */,
 		     const std::string & /* candidate */,
 		     bool /* last */) override;

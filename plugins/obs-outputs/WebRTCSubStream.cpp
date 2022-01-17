@@ -14,7 +14,11 @@
 #include "common_video/libyuv/include/webrtc_libyuv.h"
 #include "pc/rtc_stats_collector.h"
 #include "rtc_base/checks.h"
+#ifdef __APPLE__
 #include <third_party\libyuv\include\libyuv.h>
+#else
+#include "libyuv.h"
+#endif
 
 #include <algorithm>
 #include <chrono>
@@ -60,13 +64,13 @@ public:
     }
 };
 
-CustomLogger1 logger;
+CustomLogger1 logger_;
 
 WebRTCSubStream::WebRTCSubStream(obs_output_t *output,
 				 const std::string &v_codec)
 {
-    rtc::LogMessage::RemoveLogToStream(&logger);
-    rtc::LogMessage::AddLogToStream(&logger,
+    rtc::LogMessage::RemoveLogToStream(&logger_);
+    rtc::LogMessage::AddLogToStream(&logger_,
                     rtc::LoggingSeverity::LS_VERBOSE);
     video_codec = v_codec;
     resetStats();
@@ -110,7 +114,7 @@ WebRTCSubStream::WebRTCSubStream(obs_output_t *output,
 
 WebRTCSubStream::~WebRTCSubStream()
 {
-    rtc::LogMessage::RemoveLogToStream(&logger);
+    rtc::LogMessage::RemoveLogToStream(&logger_);
 
     // Shutdown websocket connection and close Peer Connection
     close(false);
@@ -337,20 +341,19 @@ bool WebRTCSubStream::start()
 
     stream = factory->CreateLocalMediaStream("obs");
 
-     audio_source = obsWebrtcAudioSource::Create(&options);
-     audio_track = factory->CreateAudioTrack("audio", audio_source);
-     pc->AddTrack(audio_track, {"obs"});
-     stream->AddTrack(audio_track);
+    //  audio_source = obsWebrtcAudioSource::Create(&options);
+    //  audio_track = factory->CreateAudioTrack("audio", audio_source);
+    //  pc->AddTrack(audio_track, {"obs"});
+    //  stream->AddTrack(audio_track);
 
     video_track = factory->CreateVideoTrack("video", videoCapturer);
-    // pc->AddTrack(video_track, {"obs"});
     stream->AddTrack(video_track);
 
     //Add audio track
-     webrtc::RtpTransceiverInit audio_init;
-     audio_init.stream_ids.push_back(stream->id());
-     audio_init.direction = webrtc::RtpTransceiverDirection::kSendOnly;
-     pc->AddTransceiver(audio_track, audio_init);
+    //  webrtc::RtpTransceiverInit audio_init;
+    //  audio_init.stream_ids.push_back(stream->id());
+    //  audio_init.direction = webrtc::RtpTransceiverDirection::kSendOnly;
+    //  pc->AddTransceiver(audio_track, audio_init);
 
     //Add video track
     webrtc::RtpTransceiverInit video_init;
@@ -433,8 +436,8 @@ void WebRTCSubStream::OnSuccess(webrtc::SessionDescriptionInterface *desc)
     std::string sdp;
     desc->ToString(&sdp);
 
-    info("Audio codec:      %s", audio_codec.c_str());
-    info("Audio bitrate:    %d\n", audio_bitrate);
+    // info("Audio codec:      %s", audio_codec.c_str());
+    // info("Audio bitrate:    %d\n", audio_bitrate);
     info("Video codec:      %s",
          video_codec.empty() ? "Automatic" : video_codec.c_str());
     info("Video bitrate:    %d\n", video_bitrate);
@@ -459,7 +462,7 @@ void WebRTCSubStream::OnSuccess(webrtc::SessionDescriptionInterface *desc)
     // Constrain video bitrate
     SDPModif::bitrateMaxMinSDP(sdpCopy, video_bitrate, video_payloads, video_bitrate_min);
 
-    SDPModif::stereoSDP(sdpCopy, audio_bitrate);
+    // SDPModif::stereoSDP(sdpCopy, audio_bitrate);
     // Enable stereo & constrain audio bitrate
     // NOTE ALEX: check that it does not incorrectly detect multiopus as opus
     // SDPModif::stereoSDP(sdpCopy, audio_bitrate);
@@ -469,7 +472,7 @@ void WebRTCSubStream::OnSuccess(webrtc::SessionDescriptionInterface *desc)
     pc->SetLocalDescription(this, desc);
 
     info("Sending OFFER (SDP) to remote peer:\n\n%s", sdpCopy.c_str());
-    if (!client->open(sdpCopy, video_codec, audio_codec, username, true)) {
+    if (!client->open(sdpCopy, video_codec, audio_codec, username, false)) {
         // Shutdown websocket connection and close Peer Connection
         close(false);
         error("Sending OFFER (SDP) Error!!!!");
@@ -600,7 +603,7 @@ void WebRTCSubStream::onOpened(const std::string &sdp)
     // Constrain video bitrate
     SDPModif::bitrateSDP(sdpCopy, video_bitrate);
     // Enable stereo & constrain audio bitrate
-    SDPModif::stereoSDP(sdpCopy, audio_bitrate);
+    // SDPModif::stereoSDP(sdpCopy, audio_bitrate);
 
     // SetRemoteDescription observer
     srd_observer = make_scoped_refptr(this);
@@ -722,7 +725,8 @@ void WebRTCSubStream::onAudioFrame(audio_data *frame)
     if (!frame)
         return;
     // Push it to the device
-    audio_source->OnAudioData(frame);
+    // if(audio_source == null) return;
+    // audio_source->OnAudioData(frame);
 }
 
 void WebRTCSubStream::onVideoFrame(video_data *frame)
