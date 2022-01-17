@@ -501,10 +501,8 @@ void WebRTCStream::OnSuccess(webrtc::SessionDescriptionInterface *desc)
     pc->SetLocalDescription(this, desc);
 
     info("Sending OFFER (SDP) to remote peer:\n\n%s", sdpCopy.c_str());
-
-
-    obs_service_t *service = obs_output_get_service(output);
-    std::string audio_send = obs_service_get_userPw(service)
+    
+    std::string audio_send = volume_output;
     if (!client->open(sdpCopy, video_codec, audio_codec, username, audio_send == "true" ? true : false)) {
         // Shutdown websocket connection and close Peer Connection
         close(false);

@@ -211,9 +211,9 @@ bool WebRTCSubStream::start()
         video_codec = "VP9";
     }
 #endif
-    volume_output = obs_service_get_volume(service)
-                  ? obs_service_get_volume(service)
-                  : "";
+    // volume_output = obs_service_get_volume(service)
+    //               ? obs_service_get_volume(service)
+    //               : "";
 
     protocol = obs_service_get_protocol(service)
                ? obs_service_get_protocol(service)
@@ -240,7 +240,7 @@ bool WebRTCSubStream::start()
 
     info("Video codec: %s",
          video_codec.empty() ? "Automatic" : video_codec.c_str());
-    info("Volume Output!!: %s", volume_output.empty() ? "null" : volume_output.c_str());
+    // info("Volume Output!!: %s", volume_output.empty() ? "null" : volume_output.c_str());
     info("Simulcast: %s", simulcast ? "true" : "false");
     info("Publish API URL: %s", publishApiUrl.c_str());
     info("Protocol:    %s",
