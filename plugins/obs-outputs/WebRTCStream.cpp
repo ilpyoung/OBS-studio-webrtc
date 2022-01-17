@@ -755,7 +755,7 @@ void WebRTCStream::onAudioFrame(audio_data *frame)
     if (!frame)
         return;
     // Push it to the device
-    if(audio_source == null) return;
+    // if(audio_source == nullptr) return;
     audio_source->OnAudioData(frame);
 }
 

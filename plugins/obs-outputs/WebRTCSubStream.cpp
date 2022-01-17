@@ -114,11 +114,7 @@ WebRTCSubStream::WebRTCSubStream(obs_output_t *output,
 
 WebRTCSubStream::~WebRTCSubStream()
 {
-<<<<<<< HEAD
     rtc::LogMessage::RemoveLogToStream(&logger_);
-=======
-    rtc::LogMessage::RemoveLogToStream(&logger1);
->>>>>>> origin/fix_juho2
 
     // Shutdown websocket connection and close Peer Connection
     close(false);
