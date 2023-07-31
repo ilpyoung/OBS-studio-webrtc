@@ -112,3 +112,4 @@ UI/webrtcVersion.h
 /.idea
 /out/install/x64-Release
 CMakeSettings.json
+webrtc

@@ -86,7 +86,6 @@ _configure_obs() {
     else
         NDI_OPTION="OFF"
     fi
-
     cmake -S . --preset ${PRESET} \
         -DCMAKE_INSTALL_PREFIX=${BUILD_DIR}/install \
         -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} \
@@ -97,7 +96,7 @@ _configure_obs() {
         ${SPARKLE_OPTIONS} \
         ${QUIET:+-Wno-deprecated -Wno-dev --log-level=ERROR} \
         ${VENDOR_OPTION} \
-        -DLibWebRTC_DIR="${DEPS_BUILD_DIR}/libwebrtc_${ARCH}/cmake" \
+        -DLibWebRTC_DIR="${DEPS_BUILD_DIR}/libwebrtc_${ARCH}/" \
         -DOPENSSL_ROOT_DIR="/usr/local/opt/openssl@1.1" \
         -DOBS_VERSION_OVERRIDE=${OBS_VERSION} \
         -DBUILD_NDI=${NDI_OPTION} \
